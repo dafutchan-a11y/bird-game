@@ -465,7 +465,29 @@
 
     function speak(text) { if ('speechSynthesis' in window) { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.rate = 0.85; speechSynthesis.speak(u); } }
 
-    // ===== FUZZY MATCHING FUNCTIONS =====
+    // ===== FUZZY MATCHING FUNCTIONS (v7.2 - child-friendly) =====
+    
+    // Soundex - encodes words by how they SOUND (helps with child pronunciation)
+    // "Bateleur" → B346, "battler" → B346, "bat a lure" → B346
+    function soundex(word) {
+      if (!word || word.length === 0) return '';
+      const w = word.toUpperCase().replace(/[^A-Z]/g, '');
+      if (w.length === 0) return '';
+      
+      const codes = {B:1,F:1,P:1,V:1, C:2,G:2,J:2,K:2,Q:2,S:2,X:2,Z:2, D:3,T:3, L:4, M:5,N:5, R:6};
+      let result = w[0];
+      let prevCode = codes[w[0]] || 0;
+      
+      for (let i = 1; i < w.length && result.length < 4; i++) {
+        const code = codes[w[i]];
+        if (code && code !== prevCode) {
+          result += code;
+        }
+        // Skip A,E,I,O,U,H,W,Y but track code changes
+        if (!'AEIOUWY'.includes(w[i])) prevCode = code || 0;
+      }
+      return result.padEnd(4, '0');
+    }
     
     // Levenshtein distance - counts edits needed to transform one string to another
     function levenshtein(a, b) {
@@ -491,6 +513,7 @@
     }
 
     // Calculate similarity score (0-1, where 1 is perfect match)
+    // v7.2: Enhanced for child speech - uses phonetic matching + more forgiving thresholds
     function similarityScore(heard, birdName) {
       const h = heard.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
       const b = birdName.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
@@ -501,38 +524,67 @@
       // One fully contains the other
       if (b.includes(h) || h.includes(b)) return 0.95;
       
-      const heardWords = h.split(/\s+/);
+      const heardWords = h.split(/\s+/).filter(w => w.length > 1); // Skip tiny words
       const birdWords = b.split(/\s+/);
       
-      // Count how many words match (with fuzzy matching per word)
+      // Calculate phonetic codes for all words
+      const heardSoundex = heardWords.map(soundex);
+      const birdSoundex = birdWords.map(soundex);
+      
+      // Count how many words match (with fuzzy + phonetic matching)
       let matchedWords = 0;
-      let firstWordBonus = 0;
+      let strongMatchBonus = 0;
+      let phoneticBonus = 0;
       
       for (let i = 0; i < heardWords.length; i++) {
         const hw = heardWords[i];
+        const hwSoundex = heardSoundex[i];
+        
         for (let j = 0; j < birdWords.length; j++) {
           const bw = birdWords[j];
+          const bwSoundex = birdSoundex[j];
+          
           const dist = levenshtein(hw, bw);
           const maxLen = Math.max(hw.length, bw.length);
           const wordSim = 1 - (dist / maxLen);
           
-          // Word matches if >70% similar
-          if (wordSim > 0.7) {
+          // PHONETIC MATCH: If words sound the same, that's a strong signal
+          const soundsAlike = hwSoundex === bwSoundex && hwSoundex !== '' && hwSoundex !== '0000';
+          
+          // Word matches if >55% similar OR sounds alike (more forgiving for kids)
+          if (wordSim > 0.55 || soundsAlike) {
             matchedWords++;
-            // Big bonus if FIRST word of heard matches FIRST word of bird name
-            // (e.g., "Western" matching "Western Screech-Owl")
-            if (i === 0 && j === 0 && wordSim > 0.8) {
-              firstWordBonus = 0.25;
+            
+            // Strong match bonus for very good matches
+            if (wordSim > 0.85 || (soundsAlike && wordSim > 0.5)) {
+              strongMatchBonus += 0.15;
             }
+            
+            // Phonetic bonus - reward words that sound alike even if spelled differently
+            if (soundsAlike) {
+              phoneticBonus += 0.2;
+            }
+            
+            // Extra bonus if a "distinctive" word matches (longer words, bird-specific)
+            if (bw.length >= 5 && (wordSim > 0.7 || soundsAlike)) {
+              strongMatchBonus += 0.1;
+            }
+            
             break; // Don't double-count this heard word
           }
         }
       }
       
+      // Also check: does FIRST LETTER of heard match FIRST LETTER of bird?
+      // Helps when child says "Ba..." for Bateleur
+      let firstLetterBonus = 0;
+      if (h.length > 0 && b.length > 0 && h[0] === b[0]) {
+        firstLetterBonus = 0.1;
+      }
+      
       // Calculate word match ratio
-      // Use max of heard/bird word counts to penalize partial matches
       const totalWords = Math.max(heardWords.length, birdWords.length);
-      const wordMatchRatio = matchedWords / totalWords;
+      const wordMatchRatio = totalWords > 0 ? matchedWords / totalWords : 0;
       
       // Overall string similarity (Levenshtein on full strings)
       const dist = levenshtein(h, b);
@@ -540,22 +592,37 @@
       const overallSim = 1 - (dist / maxLen);
       
       // Final score: weighted combination
-      // - Word match ratio is most important (how many words matched)
-      // - First word bonus rewards matching the distinguishing word
-      // - Overall string similarity as tiebreaker
-      const score = (wordMatchRatio * 0.6) + (overallSim * 0.15) + firstWordBonus;
+      // v7.2: More weight on phonetic matches and strong word matches
+      const score = (wordMatchRatio * 0.4) + 
+                    (overallSim * 0.1) + 
+                    Math.min(strongMatchBonus, 0.3) + 
+                    Math.min(phoneticBonus, 0.3) +
+                    firstLetterBonus;
       
       return Math.min(score, 1); // Cap at 1
     }
 
     // Find best matching birds for what was heard
-    function findBestMatches(heard, numResults = 3) {
+    // v7.2: Lower threshold, always show options, more forgiving for kids
+    function findBestMatches(heard, numResults = 4) {
       const scores = BIRDS.map(bird => ({
         bird: bird,
         score: similarityScore(heard, bird.name)
       }));
       scores.sort((a, b) => b.score - a.score);
-      return scores.slice(0, numResults).filter(s => s.score > 0.3);
+      
+      // Always return at least numResults options if any exist
+      // Use very low threshold (0.15) so we almost always have something to show
+      // This helps when child speech is very garbled - they can still pick from options
+      const filtered = scores.slice(0, numResults).filter(s => s.score > 0.15);
+      
+      // If we have very few good matches, pad with top scores anyway
+      // So the child always has something to tap
+      if (filtered.length < 3 && scores.length >= 3) {
+        return scores.slice(0, 3);
+      }
+      
+      return filtered.length > 0 ? filtered : scores.slice(0, 3);
     }
 
     // Speech Recognition for Lily's mode
@@ -645,9 +712,10 @@
         }
         
         // Find best matches across all heard alternatives
+        // v7.2: Check more alternatives (4) for kids
         let bestMatches = [];
         for (const heard of allHeard) {
-          const matches = findBestMatches(heard, 3);
+          const matches = findBestMatches(heard, 4);
           for (const m of matches) {
             const existing = bestMatches.find(b => b.bird.name === m.bird.name);
             if (existing) {
@@ -658,13 +726,14 @@
           }
         }
         
-        // Sort by score and take top 3
+        // Sort by score and take top 4 (v7.2: more options for kids)
         bestMatches.sort((a, b) => b.score - a.score);
-        bestMatches = bestMatches.slice(0, 3);
+        bestMatches = bestMatches.slice(0, 4);
         
         if (bestMatches.length > 0) {
-          // If top match is very confident (>0.85), auto-accept it
-          if (bestMatches[0].score > 0.85) {
+          // v7.2: Only auto-accept if VERY confident (>0.9) to avoid frustration
+          // For kids, better to show options than auto-guess wrong
+          if (bestMatches[0].score > 0.9) {
             handleVoiceGuess(bestMatches[0].bird.name);
           } else {
             // Show confirmation dialog
@@ -823,7 +892,7 @@
       else if (gameType === 'image') h += renderImage();
       else h += renderClues();
       
-      return h + `<footer><p>${BIRDS.length} birds • v7.1 🎤✨</p></footer>`;
+      return h + `<footer><p>${BIRDS.length} birds • v7.2 🎤✨</p></footer>`;
     }
 
     function renderOver() {
@@ -931,7 +1000,7 @@
             </div>
           </div>
         </div>
-        <footer><p>${BIRDS.length} birds • v7.1 🎤✨</p></footer>`;
+        <footer><p>${BIRDS.length} birds • v7.2 🎤✨</p></footer>`;
     }
 
     function renderModal() {
