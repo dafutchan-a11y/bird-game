@@ -127,6 +127,25 @@
     .confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; overflow: hidden; }
     .confetti-piece { position: absolute; top: -20px; animation: confetti-fall 3s ease-out forwards; }
     @keyframes confetti-fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+    
+    /* Bird Master Badge in Stats Bar */
+    .bird-master-small { background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%); color: #7b5e00; padding: 4px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 700; }
+    
+    /* Completion Screen */
+    .completion-screen { text-align: center; padding: 30px 20px; background: linear-gradient(135deg, #fff9e6 0%, #fff0f5 50%, #f0f8ff 100%); border-radius: 24px; margin: 20px 0; box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
+    .completion-emoji { font-size: 3rem; margin-bottom: 16px; animation: bounce 1s ease infinite; }
+    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    .completion-title { font-size: 1.8rem; font-weight: 800; color: #333; margin: 0 0 12px 0; }
+    .completion-text { font-size: 1.1rem; color: #666; margin: 0 0 24px 0; line-height: 1.5; }
+    .completion-text strong { color: #c56cf0; font-size: 1.3rem; }
+    .bird-master-badge { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%); padding: 16px 28px; border-radius: 20px; margin-bottom: 16px; box-shadow: 0 4px 16px rgba(255, 179, 71, 0.4); }
+    .bird-master-icon { font-size: 2rem; }
+    .bird-master-label { font-size: 1.2rem; font-weight: 800; color: #7b5e00; }
+    .bird-master-count { font-size: 1.4rem; font-weight: 800; color: #5a4500; }
+    .bird-master-previous { font-size: 0.85rem; color: #999; margin: 0 0 20px 0; }
+    .play-again-btn { padding: 16px 40px; font-size: 1.2rem; font-weight: 700; font-family: 'Nunito', sans-serif; color: white; background: linear-gradient(135deg, #ff6b9d 0%, #c56cf0 100%); border: none; border-radius: 25px; cursor: pointer; box-shadow: 0 6px 20px rgba(197, 108, 240, 0.4); transition: transform 0.2s; }
+    .play-again-btn:hover { transform: scale(1.05); }
+    .streak-note { font-size: 0.9rem; color: #ff9f43; margin: 16px 0 0 0; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -423,16 +442,21 @@
     let currentBird = null, revealedClues = new Set(), gameState = 'playing';
     let celebrationMessage = '', guessOptions = [], showResetModal = false;
     let hintUsed = false, streak = parseInt(localStorage.getItem('birdStreak') || '0'), learnIndex = 0;
+    let showCompletion = false; // Shows "You've seen all birds!" screen
 
     // Voice confirmation state
     let voiceConfirmBirds = []; // Array of {bird, score} to show for confirmation
     let lastHeardText = ''; // What the speech API heard
 
     function getHistory(p, t) { return JSON.parse(localStorage.getItem(`bh_${p}_${t}`) || '[]'); }
-    function addHistory(p, t, n) { const h = getHistory(p, t); localStorage.setItem(`bh_${p}_${t}`, JSON.stringify([n, ...h.filter(x => x !== n)].slice(0, 100))); }
+    function addHistory(p, t, n) { const h = getHistory(p, t); localStorage.setItem(`bh_${p}_${t}`, JSON.stringify([n, ...h.filter(x => x !== n)].slice(0, 150))); }
     function resetHistory(p, t) { localStorage.removeItem(`bh_${p}_${t}`); }
     function getSeen(p, t) { return new Set(getHistory(p, t)).size; }
     function updateStreak(won) { streak = won ? streak + 1 : 0; localStorage.setItem('birdStreak', streak); }
+    
+    // Bird Master - tracks how many times player has seen all 144 birds
+    function getBirdMaster(p, t) { return parseInt(localStorage.getItem(`birdMaster_${p}_${t}`) || '0'); }
+    function incrementBirdMaster(p, t) { const n = getBirdMaster(p, t) + 1; localStorage.setItem(`birdMaster_${p}_${t}`, n); return n; }
 
     function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
     
@@ -837,9 +861,36 @@
     function render() {
       const app = document.getElementById('app');
       if (!currentPlayer) { app.innerHTML = renderSelect(); return; }
+      if (showCompletion) { app.innerHTML = renderCompletion(); return; }
       if (showResetModal) { app.innerHTML = renderGame() + renderModal(); return; }
       if (voiceConfirmBirds.length > 0) { app.innerHTML = renderGame() + renderVoiceConfirm(); return; }
       app.innerHTML = renderGame();
+    }
+    
+    function renderCompletion() {
+      const birdMasterCount = getBirdMaster(currentPlayer, gameType);
+      const newCount = birdMasterCount + 1;
+      const playerName = currentPlayer === 'lily' ? 'Lily' : 'Gabriel';
+      const modeEmoji = gameType === 'image' ? '📷' : '💡';
+      const modeName = gameType === 'image' ? 'Image Quiz' : 'Clues';
+      
+      return `<div class="container">
+        <header><h1>🐦 Bird Game</h1></header>
+        <div class="completion-screen">
+          <div class="completion-emoji">🏆🎉🏆</div>
+          <h2 class="completion-title">Amazing, ${playerName}!</h2>
+          <p class="completion-text">You've seen and guessed<br><strong>all ${BIRDS.length} birds</strong><br>in ${modeEmoji} ${modeName} mode!</p>
+          <div class="bird-master-badge">
+            <span class="bird-master-icon">🏆</span>
+            <span class="bird-master-label">Bird Master</span>
+            <span class="bird-master-count">× ${newCount}</span>
+          </div>
+          ${birdMasterCount > 0 ? `<p class="bird-master-previous">Previously completed: ${birdMasterCount} time${birdMasterCount !== 1 ? 's' : ''}</p>` : ''}
+          <button class="play-again-btn" onclick="playAgainAfterCompletion()">🐦 Play Again!</button>
+          ${streak > 0 ? `<p class="streak-note">🔥 Current streak: ${streak}</p>` : ''}
+        </div>
+        <footer><p>${BIRDS.length} birds • v7.3 🏆</p></footer>
+      </div>`;
     }
 
     function renderVoiceConfirm() {
@@ -871,6 +922,7 @@
       if (!currentBird) return '<p style="text-align:center;color:#8b7355;">Loading...</p>';
       const isOver = gameState === 'won' || gameState === 'revealed';
       const seen = getSeen(currentPlayer, gameType);
+      const birdMaster = getBirdMaster(currentPlayer, gameType);
       
       let h = `<header><h1>🐦 Bird Game</h1><p class="subtitle">${gameType==='image'?'Guess from the picture!':'Reveal clues and guess!'}</p></header>
         <div class="player-toggle">
@@ -884,6 +936,7 @@
         </div>
         <div class="stats-bar">
           <div class="stat-item">Seen: <span class="stat-value">${seen}</span>/${BIRDS.length}</div>
+          ${birdMaster>0?`<span class="bird-master-small">🏆 ×${birdMaster}</span>`:''}
           ${streak>0?`<span class="streak-badge">🔥 ${streak}</span>`:''}
           <button class="reset-btn" onclick="showReset()">Reset</button>
         </div>`;
@@ -892,7 +945,7 @@
       else if (gameType === 'image') h += renderImage();
       else h += renderClues();
       
-      return h + `<footer><p>${BIRDS.length} birds • v7.2 🎤✨</p></footer>`;
+      return h + `<footer><p>${BIRDS.length} birds • v7.3 🏆</p></footer>`;
     }
 
     function renderOver() {
@@ -1000,7 +1053,7 @@
             </div>
           </div>
         </div>
-        <footer><p>${BIRDS.length} birds • v7.2 🎤✨</p></footer>`;
+        <footer><p>${BIRDS.length} birds • v7.3 🏆</p></footer>`;
     }
 
     function renderModal() {
@@ -1016,12 +1069,31 @@
     function switchType(t) { if (t !== gameType) { gameType = t; localStorage.setItem('birdGameType', t); if (t === 'learn') render(); else newGame(); } }
     
     function newGame() {
+      // Check if player has seen all birds - show completion screen!
+      const seen = getSeen(currentPlayer, gameType);
+      if (seen >= BIRDS.length) {
+        showCompletion = true;
+        render();
+        return;
+      }
+      
+      showCompletion = false;
       currentBird = getRandomBird(currentPlayer, gameType);
       addHistory(currentPlayer, gameType, currentBird.name);
       revealedClues = new Set(); gameState = 'playing'; celebrationMessage = ''; hintUsed = false;
       voiceConfirmBirds = []; lastHeardText = ''; // Reset voice state
       if (currentPlayer === 'gabriel') guessOptions = generateOptions(currentBird);
       render();
+    }
+    
+    function playAgainAfterCompletion() {
+      // Increment Bird Master counter
+      incrementBirdMaster(currentPlayer, gameType);
+      // Reset seen history for this player/mode
+      resetHistory(currentPlayer, gameType);
+      // Start fresh
+      showCompletion = false;
+      newGame();
     }
 
     function revealClue(id) { revealedClues.add(id); render(); }
