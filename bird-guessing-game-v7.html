@@ -495,33 +495,57 @@
       const h = heard.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
       const b = birdName.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
       
+      // Exact match
       if (h === b) return 1;
-      if (b.includes(h) || h.includes(b)) return 0.9;
+      
+      // One fully contains the other
+      if (b.includes(h) || h.includes(b)) return 0.95;
       
       const heardWords = h.split(/\s+/);
       const birdWords = b.split(/\s+/);
       
-      for (const hw of heardWords) {
-        for (const bw of birdWords) {
-          if (hw === bw && hw.length > 2) return 0.85;
-        }
-      }
+      // Count how many words match (with fuzzy matching per word)
+      let matchedWords = 0;
+      let firstWordBonus = 0;
       
-      let bestWordScore = 0;
-      for (const hw of heardWords) {
-        for (const bw of birdWords) {
+      for (let i = 0; i < heardWords.length; i++) {
+        const hw = heardWords[i];
+        for (let j = 0; j < birdWords.length; j++) {
+          const bw = birdWords[j];
           const dist = levenshtein(hw, bw);
           const maxLen = Math.max(hw.length, bw.length);
-          const wordScore = 1 - (dist / maxLen);
-          bestWordScore = Math.max(bestWordScore, wordScore);
+          const wordSim = 1 - (dist / maxLen);
+          
+          // Word matches if >70% similar
+          if (wordSim > 0.7) {
+            matchedWords++;
+            // Big bonus if FIRST word of heard matches FIRST word of bird name
+            // (e.g., "Western" matching "Western Screech-Owl")
+            if (i === 0 && j === 0 && wordSim > 0.8) {
+              firstWordBonus = 0.25;
+            }
+            break; // Don't double-count this heard word
+          }
         }
       }
       
+      // Calculate word match ratio
+      // Use max of heard/bird word counts to penalize partial matches
+      const totalWords = Math.max(heardWords.length, birdWords.length);
+      const wordMatchRatio = matchedWords / totalWords;
+      
+      // Overall string similarity (Levenshtein on full strings)
       const dist = levenshtein(h, b);
       const maxLen = Math.max(h.length, b.length);
-      const overallScore = 1 - (dist / maxLen);
+      const overallSim = 1 - (dist / maxLen);
       
-      return Math.max(overallScore * 0.7, bestWordScore * 0.8);
+      // Final score: weighted combination
+      // - Word match ratio is most important (how many words matched)
+      // - First word bonus rewards matching the distinguishing word
+      // - Overall string similarity as tiebreaker
+      const score = (wordMatchRatio * 0.6) + (overallSim * 0.15) + firstWordBonus;
+      
+      return Math.min(score, 1); // Cap at 1
     }
 
     // Find best matching birds for what was heard
@@ -799,7 +823,7 @@
       else if (gameType === 'image') h += renderImage();
       else h += renderClues();
       
-      return h + `<footer><p>${BIRDS.length} birds • v7 🎤✨</p></footer>`;
+      return h + `<footer><p>${BIRDS.length} birds • v7.1 🎤✨</p></footer>`;
     }
 
     function renderOver() {
@@ -907,7 +931,7 @@
             </div>
           </div>
         </div>
-        <footer><p>${BIRDS.length} birds • v7 🎤✨</p></footer>`;
+        <footer><p>${BIRDS.length} birds • v7.1 🎤✨</p></footer>`;
     }
 
     function renderModal() {
