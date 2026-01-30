@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🐦 Bird Guessing Game</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { margin: 0; padding: 0; font-family: 'Nunito', sans-serif; background: #fef9f3; min-height: 100vh; }
+    .container { padding: 16px; max-width: 520px; margin: 0 auto; }
+    header { text-align: center; margin-bottom: 14px; }
+    h1 { font-size: 1.7rem; font-weight: 800; background: linear-gradient(135deg, #ff6b9d 0%, #c56cf0 50%, #ff9f43 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
+    .subtitle { color: #8b7355; font-size: 0.9rem; margin: 4px 0 0 0; }
+    .player-toggle { display: flex; justify-content: center; gap: 8px; margin-bottom: 10px; }
+    .player-btn { padding: 8px 14px; font-size: 0.85rem; font-weight: 700; font-family: 'Nunito', sans-serif; border: 3px solid #e0d5c7; border-radius: 18px; background: #fff; color: #8b7355; cursor: pointer; }
+    .player-btn.active { border-color: #c56cf0; background: linear-gradient(135deg, #f8f0ff 0%, #fff5f8 100%); color: #9b4dca; }
+    .game-tabs { display: flex; justify-content: center; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+    .game-tab { padding: 8px 12px; font-size: 0.8rem; font-weight: 700; font-family: 'Nunito', sans-serif; border: 2px solid #e0d5c7; border-radius: 14px; background: #fff; color: #8b7355; cursor: pointer; }
+    .game-tab.active { border-color: #ff9f43; background: linear-gradient(135deg, #fff5e6 0%, #fff0f5 100%); color: #e67e22; }
+    .stats-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding: 10px 12px; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); flex-wrap: wrap; gap: 6px; }
+    .stat-item { font-size: 0.8rem; font-weight: 600; color: #8b7355; }
+    .stat-value { color: #c56cf0; font-weight: 800; }
+    .streak-badge { background: linear-gradient(135deg, #ff9f43 0%, #ff6b9d 100%); color: white; padding: 4px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 700; }
+    .reset-btn { padding: 6px 10px; font-size: 0.75rem; font-weight: 600; font-family: 'Nunito', sans-serif; color: #999; background: transparent; border: 2px solid #ddd; border-radius: 14px; cursor: pointer; }
+    .clue-counter { text-align: center; margin-bottom: 12px; }
+    .clue-counter span { display: inline-block; padding: 8px 14px; background: #fff; border-radius: 18px; font-size: 0.85rem; font-weight: 600; color: #8b7355; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .hint-btn { display: block; margin: 0 auto 14px auto; padding: 10px 18px; font-size: 0.85rem; font-weight: 600; font-family: 'Nunito', sans-serif; color: #fff; background: linear-gradient(135deg, #54a0ff 0%, #5f27cd 100%); border: none; border-radius: 18px; cursor: pointer; box-shadow: 0 3px 10px rgba(95, 39, 205, 0.3); }
+    .hint-display { text-align: center; margin-bottom: 14px; padding: 10px 14px; background: linear-gradient(135deg, #e8f4ff 0%, #f0e8ff 100%); border-radius: 10px; font-size: 0.95rem; font-weight: 600; color: #5f27cd; }
+    .clue-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 16px; }
+    .clue-btn { width: 100%; padding: 12px 8px; font-size: 0.85rem; font-weight: 700; font-family: 'Nunito', sans-serif; color: #fff; background: linear-gradient(135deg, #ff9f43 0%, #ff6b9d 100%); border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 3px 10px rgba(255, 107, 157, 0.3); }
+    .clue-btn.revealed { color: #666; background: #f5f5f5; border: 2px solid #ddd; box-shadow: none; }
+    .clue-answer { display: flex; align-items: flex-start; gap: 6px; margin-top: 6px; padding: 8px 10px; background: #fff; border-radius: 8px; font-size: 0.8rem; color: #444; line-height: 1.4; box-shadow: 0 2px 6px rgba(0,0,0,0.06); border: 1px solid #eee; }
+    .clue-text { flex: 1; }
+    .speak-btn { flex-shrink: 0; width: 34px; height: 34px; font-size: 1rem; background: linear-gradient(135deg, #54a0ff 0%, #5f27cd 100%); border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(95, 39, 205, 0.3); }
+    .image-quiz-section { text-align: center; margin-bottom: 16px; }
+    .quiz-image-container { background: #fff; border-radius: 14px; padding: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); margin-bottom: 14px; }
+    .quiz-image { width: 100%; max-height: 240px; object-fit: contain; border-radius: 10px; background: #f8f8f8; }
+    .quiz-image-placeholder { width: 100%; height: 180px; display: flex; align-items: center; justify-content: center; flex-direction: column; background: #f0f0f0; border-radius: 10px; color: #999; font-size: 0.9rem; }
+    .guess-section { position: relative; margin-bottom: 14px; }
+    .guess-section label { display: block; font-size: 0.9rem; font-weight: 600; color: #8b7355; margin-bottom: 6px; }
+    .guess-input { width: 100%; padding: 12px 14px; font-size: 1rem; font-family: 'Nunito', sans-serif; border: 3px solid #e0d5c7; border-radius: 12px; outline: none; }
+    .guess-input:focus { border-color: #ff9f43; }
+    .suggestions { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); z-index: 100; max-height: 220px; overflow-y: auto; margin-top: 4px; border: 1px solid #eee; }
+    .suggestion-btn { display: block; width: 100%; padding: 12px 14px; font-size: 0.9rem; font-family: 'Nunito', sans-serif; font-weight: 600; text-align: left; border: none; border-bottom: 1px solid #f0f0f0; background: transparent; cursor: pointer; }
+    .suggestion-btn:last-child { border-bottom: none; }
+    .suggestion-btn.wrong { animation: shake 0.4s ease; background: #ffe0e0; }
+    
+    /* Voice UI */
+    .voice-section { text-align: center; margin: 16px 0; padding: 16px; background: linear-gradient(135deg, #f0f8ff 0%, #f8f0ff 100%); border-radius: 16px; }
+    .voice-section-label { font-size: 0.9rem; font-weight: 700; color: #5f27cd; margin-bottom: 10px; }
+    .mic-btn { width: 64px; height: 64px; font-size: 1.6rem; background: linear-gradient(135deg, #54a0ff 0%, #5f27cd 100%); border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(95, 39, 205, 0.35); margin: 0 auto; transition: all 0.2s; }
+    .mic-btn:hover { transform: scale(1.05); }
+    .mic-btn.listening { background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%); animation: pulse 1s ease-in-out infinite; box-shadow: 0 4px 20px rgba(255, 107, 83, 0.5); }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+    .speech-status { text-align: center; font-size: 0.9rem; color: #666; margin: 10px 0 0 0; min-height: 24px; font-weight: 600; }
+    .speech-status.error { color: #e74c3c; }
+    .speech-status.success { color: #27ae60; }
+    
+    /* Voice Confirmation Modal */
+    .voice-confirm-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+    .voice-confirm-modal { background: #fff; border-radius: 22px; padding: 24px; max-width: 320px; width: 100%; text-align: center; box-shadow: 0 12px 40px rgba(0,0,0,0.25); }
+    .voice-confirm-modal h3 { font-size: 1.1rem; color: #666; margin: 0 0 6px 0; font-weight: 600; }
+    .voice-confirm-modal .heard-text { font-size: 0.85rem; color: #999; margin-bottom: 16px; }
+    .voice-confirm-modal .bird-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+    .voice-bird-btn { padding: 14px 18px; font-size: 1rem; font-weight: 700; font-family: 'Nunito', sans-serif; border-radius: 14px; border: 3px solid #e0d5c7; background: #fff; color: #333; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.15s; }
+    .voice-bird-btn:hover { border-color: #c56cf0; background: #faf5ff; }
+    .voice-bird-btn .match-score { font-size: 0.75rem; color: #999; font-weight: 600; }
+    .voice-bird-btn.top-match { border-color: #c56cf0; background: linear-gradient(135deg, #faf5ff 0%, #fff5f8 100%); }
+    .voice-cancel-btn { padding: 12px 24px; font-size: 0.9rem; font-weight: 600; font-family: 'Nunito', sans-serif; background: #f0f0f0; color: #666; border: none; border-radius: 14px; cursor: pointer; }
+    
+    .options-section { margin-bottom: 16px; }
+    .options-section label { display: block; font-size: 0.95rem; font-weight: 700; color: #8b7355; margin-bottom: 8px; text-align: center; }
+    .options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .option-btn { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 12px 10px; font-size: 0.85rem; font-weight: 700; font-family: 'Nunito', sans-serif; color: #444; background: #fff; border: 3px solid #e0d5c7; border-radius: 12px; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.06); text-align: left; }
+    .option-btn.wrong { animation: shake 0.5s ease; background: #ffe0e0; border-color: #ff6b6b; }
+    .option-btn .bird-name { flex: 1; font-size: 0.8rem; line-height: 1.2; }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
+    .reveal-btn { display: block; margin: 0 auto; padding: 10px 20px; font-size: 0.85rem; font-weight: 600; font-family: 'Nunito', sans-serif; color: #999; background: transparent; border: 2px solid #ddd; border-radius: 18px; cursor: pointer; }
+    .game-over { background: #d4edda; border-radius: 16px; padding: 18px; margin-bottom: 18px; text-align: center; border: 3px solid #c3e6cb; }
+    .game-over.revealed { background: #fff3cd; border-color: #ffeeba; }
+    .game-over h2 { font-size: 1.2rem; font-weight: 700; color: #155724; margin: 0 0 6px 0; }
+    .game-over.revealed h2 { color: #856404; }
+    .bird-name-result { font-size: 1.4rem; font-weight: 800; color: #333; margin: 0 0 8px 0; }
+    .clue-count { font-size: 0.85rem; color: #666; margin: 0 0 12px 0; }
+    .bird-image { border-radius: 12px; overflow: hidden; margin-bottom: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); background: #f5f5f5; min-height: 100px; }
+    .bird-image img { width: 100%; max-height: 220px; object-fit: contain; display: block; }
+    .image-error { padding: 24px 14px; color: #999; font-size: 0.85rem; }
+    .image-error a { color: #c56cf0; }
+    .image-placeholder { padding: 40px 14px; color: #999; font-size: 1rem; text-align: center; display: flex; align-items: center; justify-content: center; min-height: 150px; }
+    .new-bird-btn { padding: 14px 32px; font-size: 1.05rem; font-weight: 700; font-family: 'Nunito', sans-serif; color: white; background: linear-gradient(135deg, #ff6b9d 0%, #c56cf0 100%); border: none; border-radius: 22px; cursor: pointer; box-shadow: 0 4px 12px rgba(197, 108, 240, 0.4); }
+    .mode-selection { text-align: center; padding: 36px 18px; }
+    .mode-selection h1 { font-size: 1.9rem; margin-bottom: 10px; }
+    .mode-selection p { font-size: 1.05rem; color: #8b7355; margin-bottom: 32px; }
+    .mode-cards { display: flex; flex-direction: column; gap: 14px; max-width: 280px; margin: 0 auto; }
+    .mode-card { padding: 22px 18px; border-radius: 18px; border: none; cursor: pointer; text-align: center; }
+    .mode-card.lily { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); box-shadow: 0 5px 16px rgba(252, 182, 159, 0.4); }
+    .mode-card.gabriel { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); box-shadow: 0 5px 16px rgba(168, 237, 234, 0.4); }
+    .mode-card .emoji { font-size: 2.2rem; margin-bottom: 8px; }
+    .mode-card .name { font-size: 1.5rem; font-weight: 800; color: #333; margin-bottom: 4px; }
+    .mode-card .desc { font-size: 0.9rem; color: #666; }
+    .learn-section { text-align: center; }
+    .learn-nav { display: flex; justify-content: center; align-items: center; gap: 14px; margin-bottom: 14px; }
+    .learn-nav-btn { width: 44px; height: 44px; font-size: 1.3rem; font-weight: 700; background: linear-gradient(135deg, #ff9f43 0%, #ff6b9d 100%); color: white; border: none; border-radius: 50%; cursor: pointer; box-shadow: 0 3px 8px rgba(255, 107, 157, 0.3); }
+    .learn-nav-btn:disabled { background: #ddd; color: #999; box-shadow: none; }
+    .learn-counter { font-size: 0.95rem; font-weight: 700; color: #8b7355; min-width: 70px; }
+    .learn-card { background: #fff; border-radius: 18px; padding: 18px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); margin-bottom: 18px; }
+    .learn-bird-name { font-size: 1.3rem; font-weight: 800; color: #333; margin: 0 0 10px 0; }
+    .learn-image { width: 100%; max-height: 200px; object-fit: contain; border-radius: 10px; margin-bottom: 14px; background: #f8f8f8; }
+    .learn-facts { text-align: left; }
+    .learn-fact { padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
+    .learn-fact:last-child { border-bottom: none; }
+    .learn-fact-label { font-size: 0.75rem; font-weight: 700; color: #c56cf0; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+    .learn-fact-value { font-size: 0.9rem; color: #444; line-height: 1.4; }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+    .modal { background: #fff; border-radius: 18px; padding: 22px; max-width: 300px; text-align: center; box-shadow: 0 10px 36px rgba(0,0,0,0.2); }
+    .modal h3 { font-size: 1.1rem; color: #333; margin: 0 0 8px 0; }
+    .modal p { font-size: 0.9rem; color: #666; margin: 0 0 18px 0; }
+    .modal-buttons { display: flex; gap: 10px; justify-content: center; }
+    .modal-btn { padding: 10px 22px; font-size: 0.9rem; font-weight: 700; font-family: 'Nunito', sans-serif; border-radius: 14px; border: none; cursor: pointer; }
+    .modal-btn.cancel { background: #f0f0f0; color: #666; }
+    .modal-btn.confirm { background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%); color: #fff; }
+    footer { text-align: center; margin-top: 20px; padding-top: 14px; border-top: 2px solid #e0d5c7; }
+    footer p { font-size: 0.75rem; color: #aaa; margin: 0; }
+    .confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; overflow: hidden; }
+    .confetti-piece { position: absolute; top: -20px; animation: confetti-fall 3s ease-out forwards; }
+    @keyframes confetti-fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+  </style>
+</head>
+<body>
+  <div class="container"><div id="app"></div></div>
+  <script>
+    const BIRDS = [
+      { name: "African Fish-Eagle", color: "White head, chestnut belly, black wings", size: "Large (25-30 inches)", habitat: "African lakes and rivers", diet: "Fish (90% of diet)", type: "Eagle", birdOfPrey: true, specialFeatures: "Distinctive call - 'voice of Africa'", funFact: "Can catch fish up to 6 pounds!" },
+      { name: "African Grey Parrot", color: "Light gray with red tail", size: "Medium (12-14 inches)", habitat: "Central African rainforests", diet: "Fruits, seeds, nuts, and palm nuts", type: "Parrot", birdOfPrey: false, specialFeatures: "Famous for talking ability", funFact: "Can learn 1000+ words and count!" },
+      { name: "American Goldfinch", color: "Bright yellow with black cap and wings", size: "Small (4.5-5 inches)", habitat: "Weedy fields and gardens", diet: "Seeds, especially thistle", type: "Finch", birdOfPrey: false, specialFeatures: "Only finch that molts twice yearly", funFact: "State bird of 3 US states!" },
+      { name: "American Kestrel", color: "Rusty back, blue-gray wings (males)", size: "Small falcon (9-12 inches)", habitat: "Open fields with perches", diet: "Insects and small rodents", type: "Falcon", birdOfPrey: true, specialFeatures: "Can see ultraviolet light", funFact: "Smallest North American falcon!" },
+      { name: "American Robin", color: "Gray-brown with orange-red breast", size: "Medium (9-11 inches)", habitat: "Lawns, parks, and forests", diet: "Earthworms, berries, insects", type: "Thrush", birdOfPrey: false, specialFeatures: "Runs and stops to hunt worms", funFact: "Can eat 14 feet of worms daily!" },
+      { name: "Andean Condor", color: "Black with white collar and wing patches", size: "Massive (10-11 foot wingspan!)", habitat: "South American mountains", diet: "Carrion (dead animals)", type: "New World vulture", birdOfPrey: false, specialFeatures: "One of world's largest flying birds", funFact: "Can soar without flapping for hours!" },
+      { name: "Anna's Hummingbird", color: "Iridescent pink/red head (males)", size: "Tiny (3.5-4 inches)", habitat: "Western gardens and parks", diet: "Nectar and small insects", type: "Hummingbird", birdOfPrey: false, specialFeatures: "Only hummer that sings", funFact: "Heart beats 1,200 times per minute!" },
+      { name: "Atlantic Puffin", color: "Black and white with colorful bill", size: "Small (10-12 inches)", habitat: "North Atlantic islands", diet: "Fish, especially sand eels", type: "Auk (seabird)", birdOfPrey: false, specialFeatures: "Beak glows under UV light!", funFact: "Can hold 10+ fish in its beak!" },
+      { name: "Bald Eagle", color: "Dark brown body, white head and tail", size: "Very large (28-40 inches)", habitat: "Near water across North America", diet: "Fish and waterfowl", type: "Eagle", birdOfPrey: true, specialFeatures: "National bird of USA", funFact: "Builds the largest nests of any bird!" },
+      { name: "Barn Owl", color: "White heart-shaped face, golden-brown back", size: "Medium (12-15 inches)", habitat: "Farmlands and open areas worldwide", diet: "Rodents", type: "Owl", birdOfPrey: true, specialFeatures: "Heart-shaped face aids hearing", funFact: "Eats 1,000+ mice per year!" },
+      { name: "Barn Swallow", color: "Blue-black above, rusty below, forked tail", size: "Small (6-7 inches)", habitat: "Farms and open areas worldwide", diet: "Flying insects", type: "Swallow", birdOfPrey: false, specialFeatures: "Deeply forked tail", funFact: "Migrates up to 6,000 miles!" },
+      { name: "Barred Owl", color: "Brown and white barred pattern", size: "Large (17-20 inches)", habitat: "Eastern and Northwestern forests", diet: "Small mammals and birds", type: "Owl", birdOfPrey: true, specialFeatures: "Call sounds like 'Who cooks for you?'", funFact: "Can turn head almost 270 degrees!" },
+      { name: "Bearded Vulture", color: "White/orange with red eyes, black 'beard'", size: "Very large (3.5-4 foot wingspan)", habitat: "Mountain ranges of Europe/Asia/Africa", diet: "Bones! (up to 85% of diet)", type: "Old World vulture", birdOfPrey: false, specialFeatures: "Drops bones on rocks to break them", funFact: "Only bird that eats mostly bones!" },
+      { name: "Black-capped Chickadee", color: "Black cap and bib, white cheeks", size: "Tiny (4.5-6 inches)", habitat: "Forests and backyards", diet: "Insects, seeds, berries", type: "Chickadee", birdOfPrey: false, specialFeatures: "Hides thousands of seeds for winter", funFact: "Brain grows new cells in fall for memory!" },
+      { name: "Blue Jay", color: "Blue with white and black patterns", size: "Medium (9-12 inches)", habitat: "Forests and suburbs", diet: "Nuts, seeds, insects", type: "Jay (corvid)", birdOfPrey: false, specialFeatures: "Can mimic hawk calls", funFact: "Helps plant oak forests by hiding acorns!" },
+      { name: "Blue-footed Booby", color: "Brown and white with bright blue feet!", size: "Large (32-34 inches)", habitat: "Pacific coast of Americas", diet: "Fish (plunge-dives from 80+ feet!)", type: "Booby (seabird)", birdOfPrey: false, specialFeatures: "Blue feet attract mates", funFact: "Males show off feet in dance!" },
+      { name: "California Condor", color: "Black with white wing patches, bald head", size: "Huge (9.5 foot wingspan)", habitat: "California and Arizona canyons", diet: "Carrion", type: "New World vulture", birdOfPrey: false, specialFeatures: "Largest flying bird in North America", funFact: "Was down to 22 birds, now 500+!" },
+      { name: "California Quail", color: "Gray with forward-curving head plume", size: "Medium (10-11 inches)", habitat: "California chaparral and gardens", diet: "Seeds and insects", type: "Quail", birdOfPrey: false, specialFeatures: "Distinctive teardrop head plume", funFact: "State bird of California!" },
+      { name: "Canada Goose", color: "Brown body, black head with white chin strap", size: "Large (30-43 inches)", habitat: "Parks, lakes, and fields", diet: "Grass, grains, berries", type: "Goose", birdOfPrey: false, specialFeatures: "Flies in V-formation", funFact: "Mates for life - up to 25 years!" },
+      { name: "Cape Vulture", color: "Cream and brown with bluish throat", size: "Very large (8.5 foot wingspan)", habitat: "Southern African cliffs", diet: "Carrion", type: "Old World vulture", birdOfPrey: false, specialFeatures: "Colonial nester on cliffs", funFact: "Can spot carcass from 3+ miles high!" },
+      { name: "Cardinal (Northern)", color: "Males: bright red. Females: tan with red", size: "Medium (8-9 inches)", habitat: "Eastern forests and backyards", diet: "Seeds, fruits, insects", type: "Cardinal", birdOfPrey: false, specialFeatures: "Both males and females sing", funFact: "State bird of 7 US states!" },
+      { name: "Carolina Wren", color: "Rusty brown with white eyebrow", size: "Small (5-5.5 inches)", habitat: "Eastern forests and yards", diet: "Insects and spiders", type: "Wren", birdOfPrey: false, specialFeatures: "Very loud for its size", funFact: "Sings 'teakettle teakettle'!" },
+      { name: "Cedar Waxwing", color: "Silky brown with yellow-tipped tail, black mask", size: "Medium (6-7 inches)", habitat: "Woodlands and orchards", diet: "Berries (loves cedar berries!)", type: "Waxwing", birdOfPrey: false, specialFeatures: "Waxy red wing-tips", funFact: "Pass berries to each other in a row!" },
+      { name: "Chimney Swift", color: "Dark gray-brown, cigar-shaped", size: "Small (5-5.5 inches)", habitat: "Cities (chimneys) and hollow trees", diet: "Flying insects", type: "Swift", birdOfPrey: false, specialFeatures: "Never perches - clings to walls", funFact: "Eats 12,000 insects per day!" },
+      { name: "Common Loon", color: "Black and white checkerboard pattern", size: "Large (26-36 inches)", habitat: "Northern lakes", diet: "Fish", type: "Loon", birdOfPrey: false, specialFeatures: "Haunting calls echo on lakes", funFact: "Bones are solid to help it dive deep!" },
+      { name: "Common Raven", color: "All black with shaggy throat", size: "Large (22-27 inches)", habitat: "Forests, mountains, deserts", diet: "Almost anything!", type: "Corvid", birdOfPrey: false, specialFeatures: "Wedge-shaped tail, deep croaking call", funFact: "Can solve complex puzzles!" },
+      { name: "Cooper's Hawk", color: "Blue-gray above, rusty barred below", size: "Medium (14-20 inches)", habitat: "Forests and suburbs", diet: "Other birds", type: "Hawk", birdOfPrey: true, specialFeatures: "Master of agile forest flight", funFact: "Hunts birds at backyard feeders!" },
+      { name: "Downy Woodpecker", color: "Black and white, males have red spot", size: "Small (5.5-7 inches)", habitat: "Forests and backyards", diet: "Insects in tree bark", type: "Woodpecker", birdOfPrey: false, specialFeatures: "Smallest North American woodpecker", funFact: "Tongue wraps around its skull!" },
+      { name: "Eastern Bluebird", color: "Brilliant blue above, rusty breast", size: "Small (6-8 inches)", habitat: "Open woodlands and meadows", diet: "Insects and berries", type: "Thrush", birdOfPrey: false, specialFeatures: "Brilliant blue coloring", funFact: "Recovered thanks to nest boxes!" },
+      { name: "Eastern Screech-Owl", color: "Gray or red-brown with ear tufts", size: "Small (6-10 inches)", habitat: "Woodlands and suburbs", diet: "Large insects and small mammals", type: "Owl", birdOfPrey: true, specialFeatures: "Excellent camouflage", funFact: "Call is a trilling whinny, not screech!" },
+      { name: "Egyptian Vulture", color: "White with black wing feathers", size: "Large (23-28 inches)", habitat: "Mediterranean and Africa", diet: "Carrion and eggs", type: "Old World vulture", birdOfPrey: false, specialFeatures: "Uses rocks to break ostrich eggs", funFact: "One of few tool-using birds!" },
+      { name: "Eurasian Eagle-Owl", color: "Tawny-brown with orange eyes, ear tufts", size: "Huge (23-29 inches)", habitat: "Rocky cliffs and forests", diet: "Mammals up to fox size", type: "Owl", birdOfPrey: true, specialFeatures: "One of largest owl species", funFact: "Can hunt young deer!" },
+      { name: "Eurasian Griffon", color: "Tawny-brown with white neck ruff", size: "Very large (3.5 feet)", habitat: "European and Asian mountains", diet: "Carrion", type: "Old World vulture", birdOfPrey: false, specialFeatures: "Distinctive white neck ruff", funFact: "Soars for hours on thermals!" },
+      { name: "Eurasian Jay", color: "Pinkish-brown with blue wing patch", size: "Medium (13-14 inches)", habitat: "Woodlands of Europe and Asia", diet: "Acorns and insects", type: "Jay (corvid)", birdOfPrey: false, specialFeatures: "Beautiful blue wing patch", funFact: "Remembers thousands of acorn hiding spots!" },
+      { name: "European Bee-eater", color: "Rainbow: yellow, blue, chestnut", size: "Medium (10-11 inches)", habitat: "Open country near rivers", diet: "Bees and wasps", type: "Bee-eater", birdOfPrey: false, specialFeatures: "Removes stingers before eating", funFact: "Most colorful bird in Europe!" },
+      { name: "European Goldfinch", color: "Red face, golden wing bars", size: "Small (5 inches)", habitat: "European gardens and orchards", diet: "Thistle and teasel seeds", type: "Finch", birdOfPrey: false, specialFeatures: "Red face and golden wing bars", funFact: "Kept as pet for centuries for its song!" },
+      { name: "Evening Grosbeak", color: "Males: yellow and black with huge bill", size: "Medium (7-8 inches)", habitat: "North American coniferous forests", diet: "Seeds", type: "Finch", birdOfPrey: false, specialFeatures: "Massive seed-cracking bill", funFact: "Bill exerts 100+ pounds of pressure!" },
+      { name: "Florida Scrub-Jay", color: "Blue head and tail, gray back", size: "Medium (11 inches)", habitat: "Florida scrub only", diet: "Acorns and insects", type: "Jay (corvid)", birdOfPrey: false, specialFeatures: "No crest, very bold", funFact: "Found ONLY in Florida!" },
+      { name: "Golden-winged Warbler", color: "Gray with yellow crown and wing patch", size: "Small (4.5 inches)", habitat: "Eastern young forests", diet: "Insects and spiders", type: "Warbler", birdOfPrey: false, specialFeatures: "Golden wing patches and black mask", funFact: "Declining rapidly - needs young forests!" },
+      { name: "Gouldian Finch", color: "Rainbow: red/black face, purple chest, green back", size: "Small (5-6 inches)", habitat: "Australian tropical woodlands", diet: "Grass seeds", type: "Finch", birdOfPrey: false, specialFeatures: "One of most colorful birds", funFact: "Can have red, black, or yellow faces!" },
+      { name: "Great Crested Grebe", color: "Black crest, chestnut head plumes", size: "Large (18-20 inches)", habitat: "Lakes and reservoirs", diet: "Fish", type: "Grebe", birdOfPrey: false, specialFeatures: "Elaborate head plumes", funFact: "Famous for mirror courtship dance!" },
+      { name: "Great Hornbill", color: "Black and white with huge yellow bill", size: "Very large (3.5-4 feet)", habitat: "Asian tropical forests", diet: "Fruits, especially figs", type: "Hornbill", birdOfPrey: false, specialFeatures: "Massive bill with casque on top", funFact: "Female seals herself in tree to nest!" },
+      { name: "Great Horned Owl", color: "Mottled brown with large ear tufts", size: "Large (18-25 inches)", habitat: "Forests and cities", diet: "Almost anything - even skunks!", type: "Owl", birdOfPrey: true, specialFeatures: "Powerful talons, turns head 270°", funFact: "Called 'tiger of the sky'!" },
+      { name: "Great Tit", color: "Yellow belly with black stripe, green back", size: "Small (5-5.5 inches)", habitat: "Woodlands and gardens", diet: "Insects, seeds, nuts", type: "Tit (chickadee family)", birdOfPrey: false, specialFeatures: "Bold personality", funFact: "One of most studied wild birds!" },
+      { name: "Greater Flamingo", color: "White to pink with pink and black wings", size: "Very large (43-59 inches - tallest)", habitat: "Coastal lagoons", diet: "Algae and crustaceans", type: "Flamingo", birdOfPrey: false, specialFeatures: "Largest flamingo species", funFact: "Can live over 60 years!" },
+      { name: "Greater Yellow-headed Vulture", color: "Black with yellow-orange head", size: "Large (25-32 inches)", habitat: "Central/South American forests", diet: "Carrion", type: "New World vulture", birdOfPrey: false, specialFeatures: "Excellent sense of smell", funFact: "Smells carrion from over a mile!" },
+      { name: "Green Heron", color: "Dark green cap, chestnut neck", size: "Small (16-18 inches)", habitat: "Swamps and pond edges", diet: "Fish and frogs", type: "Heron", birdOfPrey: false, specialFeatures: "Stocky, often looks hunched", funFact: "Uses bait to lure fish - a tool user!" },
+      { name: "Green-cheeked Parakeet", color: "Green with gray chest, maroon tail", size: "Small (10 inches)", habitat: "South American forests (wild), homes (pet)", diet: "Fruits and seeds", type: "Parrot", birdOfPrey: false, specialFeatures: "Playful, quiet for a parrot", funFact: "Popular pet due to personality!" },
+      { name: "Grey Crowned-Crane", color: "Gray body, golden crown", size: "Large (3.3 feet tall)", habitat: "African wetlands and savannas", diet: "Seeds and insects", type: "Crane", birdOfPrey: false, specialFeatures: "Beautiful golden crown", funFact: "National bird of Uganda!" },
+      { name: "Harpy Eagle", color: "Gray head, black chest band, white belly", size: "Huge (35-41 inches, 7 ft wingspan)", habitat: "Central/South American rainforests", diet: "Monkeys and sloths", type: "Eagle", birdOfPrey: true, specialFeatures: "Talons as large as grizzly claws", funFact: "Most powerful eagle!" },
+      { name: "Heermann's Gull", color: "Gray body, white head, red bill", size: "Medium (18-21 inches)", habitat: "Pacific coast", diet: "Fish, often stolen", type: "Gull", birdOfPrey: false, specialFeatures: "Unusually dark for a gull", funFact: "Pirates food from pelicans!" },
+      { name: "Himalayan Vulture", color: "Pale sandy-brown", size: "Very large (3.5-4 feet)", habitat: "High Himalayas", diet: "Carrion", type: "Old World vulture", birdOfPrey: false, specialFeatures: "Adapted to extreme altitude", funFact: "Soars at over 20,000 feet!" },
+      { name: "Hooded Vulture", color: "Dark brown with pink face", size: "Medium-large (25-27 inches)", habitat: "African villages and towns", diet: "Carrion and scraps", type: "Old World vulture", birdOfPrey: false, specialFeatures: "Smaller, thinner bill", funFact: "Lives near humans but declining!" },
+      { name: "Hooded Warbler", color: "Males: yellow face with black hood", size: "Small (5 inches)", habitat: "Mature deciduous forests", diet: "Insects and spiders", type: "Warbler", birdOfPrey: false, specialFeatures: "Black hood frames yellow face", funFact: "Constantly flicks tail!" },
+      { name: "House Sparrow", color: "Males: gray crown, black bib", size: "Small (5.5-6.5 inches)", habitat: "Cities and farms worldwide", diet: "Seeds and scraps", type: "Sparrow", birdOfPrey: false, specialFeatures: "Extremely adaptable", funFact: "On every continent except Antarctica!" },
+      { name: "Hyacinth Macaw", color: "Deep cobalt blue with yellow eye ring", size: "Very large (40 inches - largest parrot)", habitat: "Brazilian palm groves", diet: "Palm nuts", type: "Macaw (parrot)", birdOfPrey: false, specialFeatures: "Largest flying parrot", funFact: "Bill can crack coconuts!" },
+      { name: "Indigo Bunting", color: "Males: brilliant blue all over", size: "Small (4.5-5 inches)", habitat: "Brushy areas and roadsides", diet: "Seeds and insects", type: "Bunting", birdOfPrey: false, specialFeatures: "Migrates using stars", funFact: "Not actually blue - it's light refraction!" },
+      { name: "Ivory-billed Woodpecker", color: "Black and white with red crest", size: "Large (18-20 inches)", habitat: "Southern US swamps (if exists)", diet: "Beetle larvae", type: "Woodpecker", birdOfPrey: false, specialFeatures: "May be extinct or critically rare", funFact: "Called 'Lord God Bird' for its beauty!" },
+      { name: "Kakapo", color: "Green mottled with yellow and black", size: "Large (24 inches, up to 9 lbs!)", habitat: "New Zealand islands", diet: "Plants, seeds, fruit", type: "Parrot", birdOfPrey: false, specialFeatures: "World's only flightless parrot", funFact: "Only 200 exist - world's rarest parrot!" },
+      { name: "Kea", color: "Olive-green with bright orange under wings", size: "Large (18-19 inches)", habitat: "New Zealand mountains", diet: "Omnivore - even eats sheep fat!", type: "Parrot", birdOfPrey: false, specialFeatures: "World's only alpine parrot", funFact: "Extremely smart and mischievous!" },
+      { name: "Keel-billed Toucan", color: "Black with yellow chest, rainbow bill", size: "Medium (17-22 inches)", habitat: "Central American rainforests", diet: "Fruit, insects, eggs", type: "Toucan", birdOfPrey: false, specialFeatures: "Colorful bill is mostly hollow", funFact: "Bill helps regulate body temperature!" },
+      { name: "Killdeer", color: "Brown above, white below, two black bands", size: "Medium (9-11 inches)", habitat: "Open ground, parking lots", diet: "Insects and worms", type: "Plover", birdOfPrey: false, specialFeatures: "Fakes broken wing to lure predators", funFact: "Named for its 'kill-deer' call!" },
+      { name: "King Penguin", color: "Black and white with orange ear patches", size: "Large (35-37 inches)", habitat: "Sub-Antarctic islands", diet: "Fish and squid", type: "Penguin", birdOfPrey: false, specialFeatures: "Second largest penguin", funFact: "Can dive over 1,000 feet deep!" },
+      { name: "King Vulture", color: "Cream body with colorful head", size: "Large (26-32 inches)", habitat: "Central/South American forests", diet: "Carrion", type: "New World vulture", birdOfPrey: false, specialFeatures: "Most colorful vulture", funFact: "Other vultures wait for it to open carcasses!" },
+      { name: "Kingfisher (Common)", color: "Electric blue above, orange below", size: "Small (6-7 inches)", habitat: "Rivers and streams of Europe/Asia", diet: "Fish", type: "Kingfisher", birdOfPrey: false, specialFeatures: "Dagger-like bill for fishing", funFact: "Inspired the bullet train design!" },
+      { name: "Lappet-faced Vulture", color: "Dark brown with pink folded face skin", size: "Very large (up to 9 foot wingspan)", habitat: "African savannas", diet: "Carrion", type: "Old World vulture", birdOfPrey: false, specialFeatures: "Dominant at carcasses", funFact: "Can eat skin and bone other vultures can't!" },
+      { name: "Lilac-breasted Roller", color: "Lilac chest, blue wings, green head", size: "Medium (14-15 inches)", habitat: "African savannas", diet: "Insects and lizards", type: "Roller", birdOfPrey: false, specialFeatures: "Acrobatic rolling flight display", funFact: "National bird of Kenya and Botswana!" },
+      { name: "Long-eared Owl", color: "Mottled brown with long ear tufts", size: "Medium (13-16 inches)", habitat: "Dense forests worldwide", diet: "Small mammals", type: "Owl", birdOfPrey: true, specialFeatures: "Very long ear tufts", funFact: "Roosts in groups in winter!" },
+      { name: "Long-tailed Tit", color: "Pink, black and white, very long tail", size: "Tiny (5-6 inches including tail)", habitat: "European woodlands and gardens", diet: "Insects and spiders", type: "Tit", birdOfPrey: false, specialFeatures: "Tail longer than body", funFact: "Builds stretchy nest from spider silk!" },
+      { name: "Magnificent Frigatebird", color: "Males: black with red throat pouch", size: "Very large (38-40 inch body, 7.5 ft wingspan)", habitat: "Tropical coastlines", diet: "Fish (stolen from other birds!)", type: "Frigatebird", birdOfPrey: false, specialFeatures: "Male inflates huge red throat sac", funFact: "Can stay aloft for weeks at a time!" },
+      { name: "Mallard", color: "Males: green head, gray body. Females: mottled brown", size: "Large (20-26 inches)", habitat: "Ponds, lakes, parks worldwide", diet: "Plants, insects, grain", type: "Duck", birdOfPrey: false, specialFeatures: "Most common duck worldwide", funFact: "Ancestor of most domestic ducks!" },
+      { name: "Mandarin Duck", color: "Males: orange 'sails', multicolored", size: "Medium (16-19 inches)", habitat: "East Asian forests near water", diet: "Seeds, plants, insects", type: "Duck", birdOfPrey: false, specialFeatures: "Ornate breeding plumage", funFact: "Symbol of love and fidelity in Asia!" },
+      { name: "Martial Eagle", color: "Dark brown above, spotted white below", size: "Very large (31-38 inches)", habitat: "African savannas", diet: "Mammals up to small antelope", type: "Eagle", birdOfPrey: true, specialFeatures: "Africa's largest eagle", funFact: "Can spot prey from 3 miles away!" },
+      { name: "Mountain Bluebird", color: "Males: brilliant sky blue all over", size: "Small (7 inches)", habitat: "Western mountain meadows", diet: "Insects and berries", type: "Thrush", birdOfPrey: false, specialFeatures: "Hovers while hunting", funFact: "State bird of Idaho and Nevada!" },
+      { name: "Mourning Dove", color: "Soft gray-brown with black spots", size: "Medium (9-13 inches)", habitat: "Almost everywhere in North America", diet: "Seeds", type: "Dove", birdOfPrey: false, specialFeatures: "Mournful cooing call", funFact: "Most hunted bird in North America!" },
+      { name: "Mute Swan", color: "All white with orange bill, black knob", size: "Very large (50-60 inches)", habitat: "Ponds and lakes of Europe/North America", diet: "Aquatic plants", type: "Swan", birdOfPrey: false, specialFeatures: "Curved neck, not actually mute", funFact: "Can break a human arm with its wing!" },
+      { name: "Northern Flicker", color: "Brown with black bars, red/yellow underwing", size: "Medium (11-14 inches)", habitat: "Open woodlands and yards", diet: "Ants (main food)", type: "Woodpecker", birdOfPrey: false, specialFeatures: "Often feeds on ground", funFact: "Eats more ants than any other bird!" },
+      { name: "Northern Gannet", color: "White with black wingtips, yellow head", size: "Very large (36-43 inches)", habitat: "North Atlantic coast", diet: "Fish (plunge dives at 60 mph!)", type: "Gannet (seabird)", birdOfPrey: false, specialFeatures: "Plunge-dives from 100+ feet", funFact: "Has air bags in face to cushion dives!" },
+      { name: "Northern Goshawk", color: "Blue-gray above, white below with fine bars", size: "Large (21-26 inches)", habitat: "Dense forests worldwide", diet: "Birds and squirrels", type: "Hawk", birdOfPrey: true, specialFeatures: "Fierce forest hunter", funFact: "Name means 'goose hawk'!" },
+      { name: "Ostrich", color: "Males: black and white. Females: gray-brown", size: "Huge (7-9 feet tall, 220-350 lbs!)", habitat: "African savannas and deserts", diet: "Plants, seeds, and insects", type: "Ratite (flightless)", birdOfPrey: false, specialFeatures: "World's largest bird!", funFact: "Can run 45 mph - faster than horses!" },
+      { name: "Palm-nut Vulture", color: "Mostly white with black in wings", size: "Large (23-26 inches)", habitat: "African palm forests", diet: "Palm fruit and carrion", type: "Old World vulture", birdOfPrey: false, specialFeatures: "Vegetarian vulture!", funFact: "Only vulture that eats mostly plants!" },
+      { name: "Peregrine Falcon", color: "Blue-gray above, barred below, black 'helmet'", size: "Medium (15-20 inches)", habitat: "Cities and cliffs worldwide", diet: "Other birds", type: "Falcon", birdOfPrey: true, specialFeatures: "Fastest animal on Earth!", funFact: "Dives at 240+ mph!" },
+      { name: "Philippine Eagle", color: "Brown and white with shaggy crest", size: "Huge (40-41 inches)", habitat: "Philippine rainforests only", diet: "Monkeys and flying lemurs", type: "Eagle", birdOfPrey: true, specialFeatures: "National bird of Philippines", funFact: "One of world's largest, rarest eagles!" },
+      { name: "Pileated Woodpecker", color: "Black with white stripes, red crest", size: "Large (16-19 inches)", habitat: "Eastern and Northwestern forests", diet: "Carpenter ants", type: "Woodpecker", birdOfPrey: false, specialFeatures: "Crow-sized, bright red crest", funFact: "Woody Woodpecker was based on this bird!" },
+      { name: "Pine Siskin", color: "Streaky brown with yellow wing bars", size: "Tiny (4.5-5 inches)", habitat: "Coniferous forests", diet: "Seeds, especially pine", type: "Finch", birdOfPrey: false, specialFeatures: "Yellow shows in flight", funFact: "Nomadic - follows pine cone crops!" },
+      { name: "Prothonotary Warbler", color: "Brilliant golden-yellow with gray wings", size: "Small (5.5 inches)", habitat: "Flooded southern forests", diet: "Insects and spiders", type: "Warbler", birdOfPrey: false, specialFeatures: "Only cavity-nesting warbler in East", funFact: "Named for yellow-robed Vatican officials!" },
+      { name: "Rainbow Lorikeet", color: "Blue head, orange chest, green wings", size: "Medium (10-12 inches)", habitat: "Australian forests and gardens", diet: "Nectar and pollen", type: "Parrot", birdOfPrey: false, specialFeatures: "Brush-tipped tongue for nectar", funFact: "Extremely noisy and social!" },
+      { name: "Red Kite", color: "Reddish-brown with forked tail, pale head", size: "Large (24-26 inches, 5 ft wingspan)", habitat: "European woodlands", diet: "Carrion and small prey", type: "Kite (raptor)", birdOfPrey: true, specialFeatures: "Deeply forked tail, graceful flight", funFact: "Nearly went extinct in UK but recovered!" },
+      { name: "Red-bellied Woodpecker", color: "Zebra-striped back, red cap, pale red belly", size: "Medium (9-10 inches)", habitat: "Eastern forests and suburbs", diet: "Insects, nuts, berries", type: "Woodpecker", birdOfPrey: false, specialFeatures: "Belly is barely red - odd name!", funFact: "Can stick out tongue 2 inches past bill!" },
+      { name: "Red-headed Vulture", color: "Black with red head and neck", size: "Large (30-33 inches)", habitat: "South Asian forests", diet: "Carrion", type: "Old World vulture", birdOfPrey: false, specialFeatures: "Distinctive red head", funFact: "Critically endangered from medicine poisoning!" },
+      { name: "Red-tailed Hawk", color: "Brown above, pale below, rusty red tail", size: "Large (18-26 inches)", habitat: "Open country throughout North America", diet: "Rodents, rabbits", type: "Hawk", birdOfPrey: true, specialFeatures: "Most common hawk in North America", funFact: "Its scream is used for all movie eagles!" },
+      { name: "Red-winged Blackbird", color: "Males: black with red/yellow shoulder", size: "Medium (7-9 inches)", habitat: "Marshes and fields", diet: "Seeds and insects", type: "Blackbird (icterid)", birdOfPrey: false, specialFeatures: "Males flash red shoulders to defend", funFact: "One of most abundant North American birds!" },
+      { name: "Ring-necked Pheasant", color: "Males: green head, white collar, colorful body", size: "Large (30-36 inches with tail)", habitat: "Farmlands and grasslands", diet: "Seeds, grains, insects", type: "Pheasant", birdOfPrey: false, specialFeatures: "Introduced from Asia", funFact: "State bird of South Dakota!" },
+      { name: "Road Runner", color: "Streaky brown with long tail, head crest", size: "Medium (20-24 inches)", habitat: "Southwestern deserts", diet: "Lizards, snakes, insects", type: "Cuckoo", birdOfPrey: false, specialFeatures: "Runs up to 20 mph, rarely flies", funFact: "Can kill and eat rattlesnakes!" },
+      { name: "Robin (European)", color: "Brown with bright orange-red breast", size: "Small (5-5.5 inches)", habitat: "European gardens and forests", diet: "Insects, berries, worms", type: "Chat (Old World flycatcher)", birdOfPrey: false, specialFeatures: "Britain's national bird", funFact: "Will follow gardeners for worms!" },
+      { name: "Rose-breasted Grosbeak", color: "Males: black/white with rose breast patch", size: "Medium (7-8.5 inches)", habitat: "Eastern deciduous forests", diet: "Seeds, berries, insects", type: "Grosbeak", birdOfPrey: false, specialFeatures: "Triangular rose-red patch", funFact: "Male shares nest duties equally!" },
+      { name: "Roseate Spoonbill", color: "Pink with red shoulders, bald green head", size: "Large (28-34 inches)", habitat: "Gulf Coast wetlands", diet: "Small fish and crustaceans", type: "Spoonbill", birdOfPrey: false, specialFeatures: "Spoon-shaped bill for sifting", funFact: "Gets pink color from crustaceans like flamingos!" },
+      { name: "Ruby-throated Hummingbird", color: "Males: ruby-red throat, green back", size: "Tiny (3-3.5 inches)", habitat: "Eastern gardens and forests", diet: "Nectar and tiny insects", type: "Hummingbird", birdOfPrey: false, specialFeatures: "Only breeding hummer in Eastern US", funFact: "Weighs less than a nickel!" },
+      { name: "Ruppell's Vulture", color: "Dark brown with scaly appearance", size: "Very large (8.5 foot wingspan)", habitat: "African mountains and savannas", diet: "Carrion", type: "Old World vulture", birdOfPrey: false, specialFeatures: "Mottled cream and brown", funFact: "Highest-flying bird - seen at 37,000 feet!" },
+      { name: "Sandhill Crane", color: "Gray with red forehead, tall", size: "Very large (42-46 inches)", habitat: "Wetlands and prairies", diet: "Grains, seeds, insects", type: "Crane", birdOfPrey: false, specialFeatures: "Dances and trumpets", funFact: "Oldest crane fossil is 10 million years old!" },
+      { name: "Scarlet Macaw", color: "Bright red with blue and yellow wings", size: "Large (32-36 inches)", habitat: "Central/South American rainforests", diet: "Nuts, fruits, seeds", type: "Macaw (parrot)", birdOfPrey: false, specialFeatures: "Long tail, loud calls", funFact: "National bird of Honduras!" },
+      { name: "Scarlet Tanager", color: "Males: brilliant red with black wings", size: "Medium (6.5-7 inches)", habitat: "Eastern forests (canopy)", diet: "Insects and berries", type: "Tanager (now cardinal family)", birdOfPrey: false, specialFeatures: "Stays high in treetops", funFact: "Males turn yellow-green in winter!" },
+      { name: "Scissor-tailed Flycatcher", color: "Pale gray with pink sides, very long forked tail", size: "Medium (14-15 inches with tail)", habitat: "Southern prairies and roadsides", diet: "Insects", type: "Flycatcher", birdOfPrey: false, specialFeatures: "Spectacular forked tail", funFact: "State bird of Oklahoma!" },
+      { name: "Secretary Bird", color: "Gray with black crest, long legs", size: "Very large (4 feet tall)", habitat: "African grasslands", diet: "Snakes and rodents", type: "Raptor (unique family)", birdOfPrey: true, specialFeatures: "Stomps prey with powerful kicks", funFact: "Name from quill-like head feathers!" },
+      { name: "Short-eared Owl", color: "Streaky brown with yellow eyes", size: "Medium (13-17 inches)", habitat: "Open grasslands worldwide", diet: "Voles and mice", type: "Owl", birdOfPrey: true, specialFeatures: "Hunts in daylight", funFact: "Found on every continent except Australia and Antarctica!" },
+      { name: "Shoebill", color: "Gray with massive shoe-shaped bill", size: "Very large (43-55 inches tall)", habitat: "African swamps", diet: "Lungfish and other fish", type: "Shoebill (unique family)", birdOfPrey: false, specialFeatures: "Prehistoric-looking, huge bill", funFact: "Stands motionless for hours hunting!" },
+      { name: "Slender-billed Vulture", color: "Dark with pale, thin bill", size: "Large (30-33 inches)", habitat: "South Asian forests", diet: "Carrion", type: "Old World vulture", birdOfPrey: false, specialFeatures: "Thin bill for precision", funFact: "Critically endangered - 99% population loss!" },
+      { name: "Snowy Egret", color: "All white with black legs, yellow feet", size: "Medium (22-26 inches)", habitat: "Wetlands across Americas", diet: "Fish, frogs, crustaceans", type: "Heron/Egret", birdOfPrey: false, specialFeatures: "Yellow 'golden slippers' on black legs", funFact: "Almost went extinct for plume hats!" },
+      { name: "Snowy Owl", color: "White with variable black spots", size: "Large (20-28 inches)", habitat: "Arctic tundra, winters south", diet: "Lemmings and voles", type: "Owl", birdOfPrey: true, specialFeatures: "Hunts day and night", funFact: "Hedwig from Harry Potter was a Snowy Owl!" },
+      { name: "Spotted Owl", color: "Brown with white spots", size: "Medium (16-19 inches)", habitat: "Old-growth forests of West", diet: "Flying squirrels and wood rats", type: "Owl", birdOfPrey: true, specialFeatures: "Needs ancient forests", funFact: "Center of major conservation battles!" },
+      { name: "Stellar's Jay", color: "Deep blue with black crest", size: "Medium (12-13 inches)", habitat: "Western coniferous forests", diet: "Nuts, seeds, insects", type: "Jay (corvid)", birdOfPrey: false, specialFeatures: "Only crested jay in West", funFact: "Can mimic hawk and squirrel calls!" },
+      { name: "Sulphur-crested Cockatoo", color: "White with yellow crest and underwing", size: "Large (18-20 inches)", habitat: "Australian forests and cities", diet: "Seeds, nuts, fruits", type: "Cockatoo (parrot)", birdOfPrey: false, specialFeatures: "Raises crest when excited", funFact: "Can live 80+ years!" },
+      { name: "Summer Tanager", color: "Males: all red. Females: yellow", size: "Medium (6.5-7 inches)", habitat: "Southern forests", diet: "Bees and wasps (removes stingers!)", type: "Tanager (now cardinal family)", birdOfPrey: false, specialFeatures: "Only all-red bird in North America", funFact: "Catches bees in flight!" },
+      { name: "Superb Lyrebird", color: "Brown with spectacular lyre-shaped tail", size: "Large (34-38 inches with tail)", habitat: "Australian rainforests", diet: "Insects and worms", type: "Lyrebird", birdOfPrey: false, specialFeatures: "Best mimic in world", funFact: "Can copy chainsaws, cameras, car alarms!" },
+      { name: "Tawny Frogmouth", color: "Mottled gray-brown (bark-like)", size: "Medium (13-21 inches)", habitat: "Australian forests", diet: "Insects and small prey", type: "Frogmouth (nightjar relative)", birdOfPrey: false, specialFeatures: "Incredible camouflage as broken branch", funFact: "Often mistaken for owls but not related!" },
+      { name: "Toco Toucan", color: "Black with white throat, huge orange bill", size: "Large (25 inches)", habitat: "South American forests", diet: "Fruits and eggs", type: "Toucan", birdOfPrey: false, specialFeatures: "Largest bill relative to body", funFact: "Bill is lightweight honeycomb inside!" },
+      { name: "Trumpeter Swan", color: "All white with black bill", size: "Huge (54-62 inches, heaviest flying bird in NA)", habitat: "Northern wetlands", diet: "Aquatic plants", type: "Swan", birdOfPrey: false, specialFeatures: "Longest body of any native NA bird", funFact: "Wingspan can reach 8 feet!" },
+      { name: "Tufted Puffin", color: "Black with white face, orange bill, yellow tufts", size: "Medium (15 inches)", habitat: "North Pacific coasts", diet: "Fish", type: "Auk (seabird)", birdOfPrey: false, specialFeatures: "Blonde tufts in breeding season", funFact: "Can dive 200 feet deep!" },
+      { name: "Tufted Titmouse", color: "Gray with peach flanks, crested", size: "Small (5.5-6 inches)", habitat: "Eastern forests and backyards", diet: "Insects, seeds, berries", type: "Titmouse", birdOfPrey: false, specialFeatures: "Pointed crest, big black eyes", funFact: "Plucks hair from live mammals for nests!" },
+      { name: "Turkey Vulture", color: "Dark brown/black with red bald head", size: "Large (26-32 inches, 6 ft wingspan)", habitat: "Throughout Americas", diet: "Carrion", type: "New World vulture", birdOfPrey: false, specialFeatures: "Excellent sense of smell", funFact: "Called 'nature's cleanup crew'!" },
+      { name: "Victoria Crowned-Pigeon", color: "Blue-gray with elegant lace-like crest", size: "Large (28-30 inches)", habitat: "New Guinea rainforests", diet: "Fallen fruits and seeds", type: "Pigeon", birdOfPrey: false, specialFeatures: "Spectacular fan-shaped crest", funFact: "Largest living pigeon - size of turkey!" },
+      { name: "Wandering Albatross", color: "White with black wing edges", size: "Huge (longest wingspan: 11+ feet!)", habitat: "Southern oceans", diet: "Fish and squid", type: "Albatross", birdOfPrey: false, specialFeatures: "Longest wingspan of any bird", funFact: "Can glide for hours without flapping!" },
+      { name: "Western Meadowlark", color: "Brown above, yellow below with black V", size: "Medium (8-10 inches)", habitat: "Western grasslands and prairies", diet: "Insects and seeds", type: "Blackbird (icterid)", birdOfPrey: false, specialFeatures: "Melodious flute-like song", funFact: "State bird of 6 western states!" },
+      { name: "White-backed Vulture", color: "Dark brown with white lower back", size: "Large (37 inches)", habitat: "African savannas", diet: "Carrion", type: "Old World vulture", birdOfPrey: false, specialFeatures: "White back visible in flight", funFact: "Most common African vulture but declining!" },
+      { name: "White-bellied Sea-Eagle", color: "White head and belly, gray back and wings", size: "Very large (30-35 inches)", habitat: "Coasts of Australia and Asia", diet: "Fish and sea snakes", type: "Eagle", birdOfPrey: true, specialFeatures: "Broad wings, short tail", funFact: "Featured on Singapore's coat of arms!" },
+      { name: "White-breasted Nuthatch", color: "Blue-gray above, white face and belly", size: "Small (5-5.5 inches)", habitat: "Deciduous forests and yards", diet: "Insects, nuts, seeds", type: "Nuthatch", birdOfPrey: false, specialFeatures: "Walks headfirst down trees", funFact: "Stores seeds under bark for winter!" },
+      { name: "White-headed Vulture", color: "Dark with white head and crop patch", size: "Large (32-36 inches)", habitat: "African savannas", diet: "Carrion and sometimes live prey", type: "Old World vulture", birdOfPrey: false, specialFeatures: "Pink face, white head", funFact: "Can hunt live flamingo chicks!" },
+      { name: "White-throated Sparrow", color: "Brown with white throat, yellow spot", size: "Medium (6-7 inches)", habitat: "Eastern forests and feeders", diet: "Seeds and insects", type: "Sparrow", birdOfPrey: false, specialFeatures: "Whistles 'Oh Sweet Canada'", funFact: "Has two color forms that mate together!" },
+      { name: "Whooping Crane", color: "White with red crown, black wingtips", size: "Very large (52 inches, 5 ft tall)", habitat: "Marshes, migrates Texas to Canada", diet: "Blue crabs and mollusks", type: "Crane", birdOfPrey: false, specialFeatures: "Tallest North American bird", funFact: "Was down to 21 birds - now 800+!" },
+      { name: "Wild Turkey", color: "Dark iridescent bronze, bald head, red wattle", size: "Very large (36-48 inches)", habitat: "Eastern and southwestern forests", diet: "Nuts, seeds, insects", type: "Turkey", birdOfPrey: false, specialFeatures: "Males fan tail and gobble", funFact: "Can fly short distances at 55 mph!" },
+      { name: "Wilson's Phalarope", color: "Gray and chestnut (females more colorful)", size: "Medium (9 inches)", habitat: "Prairie wetlands", diet: "Aquatic invertebrates", type: "Sandpiper", birdOfPrey: false, specialFeatures: "Spins in water to stir up food", funFact: "Females are larger and more colorful - role reversal!" },
+      { name: "Wood Duck", color: "Males: green/purple head, chestnut breast", size: "Medium (18-21 inches)", habitat: "Wooded swamps and rivers", diet: "Seeds, nuts, insects", type: "Duck", birdOfPrey: false, specialFeatures: "Often called most beautiful duck", funFact: "Nests in tree holes up to 60 ft high!" },
+      { name: "Wood Thrush", color: "Rusty brown above, spotted breast", size: "Medium (7.5-8.5 inches)", habitat: "Eastern forests", diet: "Insects and berries", type: "Thrush", birdOfPrey: false, specialFeatures: "Flute-like song, double notes", funFact: "Can sing two notes at once!" },
+      { name: "Yellow Warbler", color: "Bright yellow all over with red streaks", size: "Small (4.5-5 inches)", habitat: "Willows and wet thickets", diet: "Insects and caterpillars", type: "Warbler", birdOfPrey: false, specialFeatures: "Yellow even in fall", funFact: "Builds new nest over cowbird eggs!" },
+      { name: "Yellow-rumped Warbler", color: "Blue-gray with yellow rump and sides", size: "Small (5-6 inches)", habitat: "Forests across North America", diet: "Insects and berries", type: "Warbler", birdOfPrey: false, specialFeatures: "Can digest waxy berries", funFact: "Most common winter warbler in US!" },
+      { name: "Zebra Finch", color: "Gray with orange cheeks, zebra stripes", size: "Tiny (4 inches)", habitat: "Australian grasslands (wild), homes (pet)", diet: "Grass seeds", type: "Finch", birdOfPrey: false, specialFeatures: "Common pet, beautiful song", funFact: "Males learn songs from fathers!" }
+    ];
+
+    const CLUE_CATEGORIES = [
+      { id: 'color', label: 'Color', icon: '🎨', key: 'color' },
+      { id: 'size', label: 'Size', icon: '📏', key: 'size' },
+      { id: 'habitat', label: 'Habitat', icon: '🌍', key: 'habitat' },
+      { id: 'diet', label: 'Diet', icon: '🍽️', key: 'diet' },
+      { id: 'type', label: 'Type', icon: '🐦', key: 'type' },
+      { id: 'birdOfPrey', label: 'Bird of Prey?', icon: '🦅', key: 'birdOfPrey' },
+      { id: 'specialFeatures', label: 'Special', icon: '⭐', key: 'specialFeatures' },
+      { id: 'funFact', label: 'Fun Fact', icon: '💡', key: 'funFact' }
+    ];
+
+    const CELEBRATIONS = ["Amazing! 🎉", "Great job! 🌟", "Bird expert! 🦜", "Well done! ⭐", "Fantastic! 🎊", "You got it! 🐦"];
+
+    let currentPlayer = localStorage.getItem('birdGamePlayer') || null;
+    let gameType = localStorage.getItem('birdGameType') || 'clues';
+    let currentBird = null, revealedClues = new Set(), gameState = 'playing';
+    let celebrationMessage = '', guessOptions = [], showResetModal = false;
+    let hintUsed = false, streak = parseInt(localStorage.getItem('birdStreak') || '0'), learnIndex = 0;
+
+    // Voice confirmation state
+    let voiceConfirmBirds = []; // Array of {bird, score} to show for confirmation
+    let lastHeardText = ''; // What the speech API heard
+
+    function getHistory(p, t) { return JSON.parse(localStorage.getItem(`bh_${p}_${t}`) || '[]'); }
+    function addHistory(p, t, n) { const h = getHistory(p, t); localStorage.setItem(`bh_${p}_${t}`, JSON.stringify([n, ...h.filter(x => x !== n)].slice(0, 100))); }
+    function resetHistory(p, t) { localStorage.removeItem(`bh_${p}_${t}`); }
+    function getSeen(p, t) { return new Set(getHistory(p, t)).size; }
+    function updateStreak(won) { streak = won ? streak + 1 : 0; localStorage.setItem('birdStreak', streak); }
+
+    function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+    
+    function getRandomBird(p, t) {
+      const hist = new Set(getHistory(p, t));
+      const unseen = BIRDS.filter(b => !hist.has(b.name));
+      if (unseen.length === 0) return BIRDS[Math.floor(Math.random() * BIRDS.length)];
+      return unseen[Math.floor(Math.random() * unseen.length)];
+    }
+
+    function getBirdType(b) {
+      const t = b.type.toLowerCase();
+      const kw = ['owl','hawk','eagle','falcon','duck','goose','swan','heron','crane','flamingo','jay','finch','sparrow','warbler','vulture','gull','tern','kingfisher','hummingbird','parrot','macaw','plover','hornbill','roller'];
+      for (const k of kw) if (t.includes(k)) return k;
+      return t.split(' ')[0];
+    }
+
+    function generateOptions(bird) {
+      const type = getBirdType(bird);
+      const similar = shuffle(BIRDS.filter(b => b.name !== bird.name && getBirdType(b) === type)).slice(0, 2);
+      const others = shuffle(BIRDS.filter(b => b.name !== bird.name && !similar.includes(b))).slice(0, 5 - similar.length);
+      return shuffle([bird, ...similar, ...others]);
+    }
+
+    function getSuggestions(g) {
+      if (!g.trim()) return [];
+      const t = g.toLowerCase();
+      return BIRDS.filter(b => b.name.toLowerCase().includes(t)).map(b => b.name).slice(0, 8);
+    }
+
+    function speak(text) { if ('speechSynthesis' in window) { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.rate = 0.85; speechSynthesis.speak(u); } }
+
+    // ===== FUZZY MATCHING FUNCTIONS =====
+    
+    // Levenshtein distance - counts edits needed to transform one string to another
+    function levenshtein(a, b) {
+      if (a.length === 0) return b.length;
+      if (b.length === 0) return a.length;
+      const matrix = [];
+      for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+      for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+      for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+          if (b.charAt(i-1) === a.charAt(j-1)) {
+            matrix[i][j] = matrix[i-1][j-1];
+          } else {
+            matrix[i][j] = Math.min(
+              matrix[i-1][j-1] + 1, // substitution
+              matrix[i][j-1] + 1,   // insertion
+              matrix[i-1][j] + 1    // deletion
+            );
+          }
+        }
+      }
+      return matrix[b.length][a.length];
+    }
+
+    // Calculate similarity score (0-1, where 1 is perfect match)
+    function similarityScore(heard, birdName) {
+      const h = heard.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
+      const b = birdName.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
+      
+      // Exact match
+      if (h === b) return 1;
+      
+      // Check if one contains the other
+      if (b.includes(h) || h.includes(b)) return 0.9;
+      
+      // Check individual words
+      const heardWords = h.split(/\s+/);
+      const birdWords = b.split(/\s+/);
+      
+      // If any word matches exactly, high score
+      for (const hw of heardWords) {
+        for (const bw of birdWords) {
+          if (hw === bw && hw.length > 2) return 0.85;
+        }
+      }
+      
+      // Check phonetic similarity for each word
+      let bestWordScore = 0;
+      for (const hw of heardWords) {
+        for (const bw of birdWords) {
+          const dist = levenshtein(hw, bw);
+          const maxLen = Math.max(hw.length, bw.length);
+          const wordScore = 1 - (dist / maxLen);
+          bestWordScore = Math.max(bestWordScore, wordScore);
+        }
+      }
+      
+      // Overall string similarity
+      const dist = levenshtein(h, b);
+      const maxLen = Math.max(h.length, b.length);
+      const overallScore = 1 - (dist / maxLen);
+      
+      // Weight word matches higher than overall string match
+      return Math.max(overallScore * 0.7, bestWordScore * 0.8);
+    }
+
+    // Find best matching birds for what was heard
+    function findBestMatches(heard, numResults = 3) {
+      const scores = BIRDS.map(bird => ({
+        bird: bird,
+        score: similarityScore(heard, bird.name)
+      }));
+      
+      // Sort by score descending
+      scores.sort((a, b) => b.score - a.score);
+      
+      // Return top matches with score > 0.3
+      return scores.slice(0, numResults).filter(s => s.score > 0.3);
+    }
+
+    // ===== SPEECH RECOGNITION =====
+    let isListening = false;
+    let recognition = null;
+
+    function initSpeechRecognition() {
+      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) return null;
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const r = new SR();
+      r.continuous = false;
+      r.interimResults = true;
+      r.lang = 'en-US';
+      r.maxAlternatives = 5;
+      
+      r.onstart = () => { 
+        isListening = true; 
+        updateMicUI(); 
+      };
+      
+      r.onaudiostart = () => {
+        const status = document.getElementById('speech-status');
+        if (status) status.textContent = '🎤 Speak now...';
+      };
+      
+      r.onspeechstart = () => {
+        const status = document.getElementById('speech-status');
+        if (status) status.textContent = '👂 Hearing you...';
+      };
+      
+      r.onend = () => { 
+        isListening = false; 
+        updateMicUI();
+        const status = document.getElementById('speech-status');
+        if (status && (status.textContent === 'Listening...' || status.textContent === '🎤 Speak now...')) {
+          status.textContent = 'No speech heard - tap to try again';
+          status.className = 'speech-status error';
+        }
+      };
+      
+      r.onerror = (e) => {
+        isListening = false;
+        updateMicUI();
+        const status = document.getElementById('speech-status');
+        if (status) {
+          if (e.error === 'no-speech') status.textContent = 'No speech heard - tap and speak louder!';
+          else if (e.error === 'not-allowed') status.textContent = 'Microphone blocked - check settings';
+          else if (e.error === 'network') status.textContent = 'Need internet for voice';
+          else status.textContent = 'Error - tap to try again';
+          status.className = 'speech-status error';
+        }
+      };
+      
+      r.onresult = (e) => {
+        const status = document.getElementById('speech-status');
+        const result = e.results[e.results.length - 1];
+        const transcript = result[0].transcript.trim();
+        
+        // Show interim results
+        if (!result.isFinal) {
+          if (status) { 
+            status.textContent = `Hearing: "${transcript}..."`;
+            status.className = 'speech-status';
+          }
+          return;
+        }
+        
+        // Final result - find best matching birds
+        lastHeardText = transcript;
+        
+        // Check all alternatives from speech API
+        let allHeard = [];
+        for (let i = 0; i < result.length; i++) {
+          allHeard.push(result[i].transcript.trim());
+        }
+        
+        // Find best matches across all heard alternatives
+        let bestMatches = [];
+        for (const heard of allHeard) {
+          const matches = findBestMatches(heard, 3);
+          for (const m of matches) {
+            const existing = bestMatches.find(b => b.bird.name === m.bird.name);
+            if (existing) {
+              existing.score = Math.max(existing.score, m.score);
+            } else {
+              bestMatches.push(m);
+            }
+          }
+        }
+        
+        // Sort by score and take top 3
+        bestMatches.sort((a, b) => b.score - a.score);
+        bestMatches = bestMatches.slice(0, 3);
+        
+        if (bestMatches.length > 0) {
+          // If top match is very confident (>0.85), auto-accept it
+          if (bestMatches[0].score > 0.85) {
+            handleVoiceGuess(bestMatches[0].bird.name);
+          } else {
+            // Show confirmation dialog
+            voiceConfirmBirds = bestMatches;
+            if (status) {
+              status.textContent = `Heard: "${transcript}"`;
+              status.className = 'speech-status';
+            }
+            render();
+          }
+        } else {
+          if (status) {
+            status.textContent = `"${transcript}" - couldn't match a bird`;
+            status.className = 'speech-status error';
+          }
+        }
+      };
+      return r;
+    }
+
+    function handleVoiceGuess(birdName) {
+      voiceConfirmBirds = []; // Clear confirmation
+      const status = document.getElementById('speech-status');
+      
+      if (birdName.toLowerCase() === currentBird.name.toLowerCase()) {
+        gameState = 'won';
+        celebrationMessage = CELEBRATIONS[Math.floor(Math.random()*CELEBRATIONS.length)];
+        updateStreak(true);
+        confetti();
+        render();
+      } else {
+        if (status) {
+          status.textContent = `"${birdName}" - not quite, try again!`;
+          status.className = 'speech-status error';
+        }
+        render();
+      }
+    }
+
+    function confirmVoiceBird(birdName) {
+      handleVoiceGuess(birdName);
+    }
+
+    function cancelVoiceConfirm() {
+      voiceConfirmBirds = [];
+      lastHeardText = '';
+      const status = document.getElementById('speech-status');
+      if (status) {
+        status.textContent = 'Tap mic to try again';
+        status.className = 'speech-status';
+      }
+      render();
+    }
+
+    function toggleMic() {
+      if (!recognition) recognition = initSpeechRecognition();
+      if (!recognition) { alert('Speech recognition not supported'); return; }
+      if (isListening) { 
+        recognition.stop(); 
+      } else { 
+        recognition = initSpeechRecognition();
+        const status = document.getElementById('speech-status');
+        if (status) { status.textContent = 'Listening...'; status.className = 'speech-status'; }
+        try {
+          recognition.start(); 
+        } catch (e) {
+          if (status) { status.textContent = 'Error - tap again'; status.className = 'speech-status error'; }
+        }
+      }
+    }
+
+    function updateMicUI() {
+      const btn = document.getElementById('mic-btn');
+      if (btn) {
+        btn.className = isListening ? 'mic-btn listening' : 'mic-btn';
+        btn.innerHTML = isListening ? '🔴' : '🎤';
+      }
+    }
+
+    function confetti() {
+      const d = document.createElement('div'); d.className = 'confetti';
+      const colors = ['#ff6b9d','#c56cf0','#ff9f43','#54a0ff','#5f27cd','#00d2d3'];
+      for (let i = 0; i < 60; i++) {
+        const p = document.createElement('div'); p.className = 'confetti-piece';
+        p.style.left = Math.random()*100+'%'; p.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
+        p.style.animationDelay = Math.random()*0.5+'s'; p.style.width = p.style.height = (Math.random()*6+4)+'px';
+        p.style.borderRadius = Math.random()>0.5?'50%':'2px'; d.appendChild(p);
+      }
+      document.body.appendChild(d); setTimeout(() => d.remove(), 3500);
+    }
+
+    // ===== IMAGE LOADING =====
+    async function loadResultImage() {
+      const img = document.getElementById('result-image');
+      const placeholder = document.getElementById('result-placeholder');
+      const errorEl = document.querySelector('.bird-image .image-error');
+      if (!img || !currentBird) return;
+      
+      if (currentBird.image) {
+        img.onload = () => { img.style.display = 'block'; if (placeholder) placeholder.style.display = 'none'; };
+        img.onerror = () => { if (placeholder) placeholder.style.display = 'none'; if (errorEl) errorEl.style.display = 'block'; };
+        img.src = currentBird.image;
+      } else {
+        if (placeholder) placeholder.textContent = '🐦 No image available';
+      }
+    }
+
+    async function loadQuizImage() {
+      const img = document.getElementById('quiz-image');
+      const placeholder = document.getElementById('quiz-placeholder');
+      if (!img || !currentBird || !currentBird.image) return;
+      
+      img.onload = () => { img.style.display = 'block'; if (placeholder) placeholder.style.display = 'none'; };
+      img.onerror = () => { if (placeholder) placeholder.innerHTML = '🐦 Image failed to load<br><small>Try another bird</small>'; };
+      img.src = currentBird.image;
+    }
+
+    async function loadLearnImage(birdName) {
+      const img = document.getElementById('learn-image');
+      const placeholder = document.getElementById('learn-placeholder');
+      const bird = BIRDS.find(b => b.name === birdName);
+      if (!img || !bird) return;
+      
+      if (bird.image) {
+        img.onload = () => { img.style.display = 'block'; if (placeholder) placeholder.style.display = 'none'; };
+        img.onerror = () => { if (placeholder) placeholder.textContent = '🐦 No image'; img.style.display = 'none'; };
+        img.src = bird.image;
+      } else {
+        if (placeholder) placeholder.textContent = '🐦 No image available';
+      }
+    }
+
+    // ===== RENDER FUNCTIONS =====
+    function render() {
+      const app = document.getElementById('app');
+      if (!currentPlayer) { app.innerHTML = renderSelect(); return; }
+      if (showResetModal) { app.innerHTML = renderGame() + renderModal(); return; }
+      if (voiceConfirmBirds.length > 0) { app.innerHTML = renderGame() + renderVoiceConfirm(); return; }
+      app.innerHTML = renderGame();
+    }
+
+    function renderSelect() {
+      return `<div class="mode-selection"><h1>🐦 Bird Game</h1><p>Who's playing?</p><div class="mode-cards">
+        <button class="mode-card lily" onclick="selectPlayer('lily')"><div class="emoji">🦉</div><div class="name">Lily</div><div class="desc">Type or speak</div></button>
+        <button class="mode-card gabriel" onclick="selectPlayer('gabriel')"><div class="emoji">🐣</div><div class="name">Gabriel</div><div class="desc">Tap or speak</div></button></div></div>`;
+    }
+
+    function renderGame() {
+      if (gameType === 'learn') return renderLearn();
+      if (!currentBird) return '<p style="text-align:center;color:#8b7355;">Loading...</p>';
+      const isOver = gameState === 'won' || gameState === 'revealed';
+      const seen = getSeen(currentPlayer, gameType);
+      
+      let h = `<header><h1>🐦 Bird Game</h1><p class="subtitle">${gameType==='image'?'Guess from the picture!':'Reveal clues and guess!'}</p></header>
+        <div class="player-toggle">
+          <button class="player-btn ${currentPlayer==='lily'?'active':''}" onclick="switchPlayer('lily')">🦉 Lily</button>
+          <button class="player-btn ${currentPlayer==='gabriel'?'active':''}" onclick="switchPlayer('gabriel')">🐣 Gabriel</button>
+        </div>
+        <div class="game-tabs">
+          <button class="game-tab ${gameType==='clues'?'active':''}" onclick="switchType('clues')">💡 Clues</button>
+          <button class="game-tab ${gameType==='image'?'active':''}" onclick="switchType('image')">📷 Image</button>
+          <button class="game-tab ${gameType==='learn'?'active':''}" onclick="switchType('learn')">📚 Learn</button>
+        </div>
+        <div class="stats-bar">
+          <div class="stat-item">Seen: <span class="stat-value">${seen}</span>/${BIRDS.length}</div>
+          ${streak>0?`<span class="streak-badge">🔥 ${streak}</span>`:''}
+          <button class="reset-btn" onclick="showReset()">Reset</button>
+        </div>`;
+      
+      if (isOver) h += renderOver();
+      else if (gameType === 'image') h += renderImage();
+      else h += renderClues();
+      
+      return h + `<footer><p>${BIRDS.length} birds • v7 🎤✨</p></footer>`;
+    }
+
+    function renderOver() {
+      const wiki = `https://en.wikipedia.org/wiki/${currentBird.name.replace(/ /g,'_')}`;
+      setTimeout(() => loadResultImage(), 0);
+      return `<div class="game-over ${gameState==='revealed'?'revealed':''}">
+        ${gameState==='won'?'<div style="font-size:2rem;margin-bottom:8px;">🎉</div>':''}
+        <h2>${gameState==='won'?celebrationMessage:'The answer was...'}</h2>
+        <p class="bird-name-result">${currentBird.name}</p>
+        ${gameType==='clues'?`<p class="clue-count">${revealedClues.size} clue${revealedClues.size!==1?'s':''} used</p>`:''}
+        <div class="bird-image">
+          <div id="result-placeholder" class="image-placeholder">🐦 Loading image...</div>
+          <img id="result-image" style="display:none" alt="${currentBird.name}">
+          <p class="image-error" style="display:none"><a href="${wiki}" target="_blank">See on Wikipedia</a></p>
+        </div>
+        <button class="new-bird-btn" onclick="newGame()">🐦 New Bird</button></div>`;
+    }
+
+    function renderImage() {
+      setTimeout(() => loadQuizImage(), 0);
+      return `<div class="image-quiz-section"><div class="quiz-image-container">
+        <div id="quiz-placeholder" class="quiz-image-placeholder">🐦 Loading bird image...</div>
+        <img class="quiz-image" id="quiz-image" style="display:none" alt="Mystery bird">
+      </div></div>
+      ${!hintUsed?`<button class="hint-btn" onclick="useHint()">💡 First Letter Hint</button>`:`<div class="hint-display">Starts with "${currentBird.name[0].toUpperCase()}"...</div>`}
+      ${renderVoiceInput()}
+      ${currentPlayer==='lily'?renderLilyOptions():renderGabrielOptions()}
+      <button class="reveal-btn" onclick="reveal()">I Give Up</button>`;
+    }
+
+    function renderClues() {
+      return `<div class="clue-counter"><span>Clues: ${revealedClues.size}/${CLUE_CATEGORIES.length}</span></div>
+        ${!hintUsed?`<button class="hint-btn" onclick="useHint()">💡 First Letter Hint</button>`:`<div class="hint-display">Starts with "${currentBird.name[0].toUpperCase()}"...</div>`}
+        <div class="clue-grid">${CLUE_CATEGORIES.map(c => {
+          const r = revealedClues.has(c.id);
+          const v = c.id==='birdOfPrey'?(currentBird.birdOfPrey?'Yes! 🦅':'No 🐦'):currentBird[c.key];
+          return `<div class="clue-item"><button class="clue-btn ${r?'revealed':''}" onclick="revealClue('${c.id}')" ${r?'disabled':''}>${c.icon} ${c.label}</button>
+            ${r?`<div class="clue-answer"><span class="clue-text">${v}</span><button class="speak-btn" onclick="event.stopPropagation();speak('${v.replace(/'/g,"\\'")}')">🔊</button></div>`:''}</div>`;
+        }).join('')}</div>
+        ${renderVoiceInput()}
+        ${currentPlayer==='lily'?renderLilyOptions():renderGabrielOptions()}
+        <button class="reveal-btn" onclick="reveal()">I Give Up</button>`;
+    }
+
+    // Voice input section - shared by both players
+    function renderVoiceInput() {
+      const speechSupported = ('webkitSpeechRecognition' in window) || ('SpeechRecognition' in window);
+      if (!speechSupported) return '';
+      
+      return `<div class="voice-section">
+        <div class="voice-section-label">🎤 Say the bird's name!</div>
+        <button class="mic-btn ${isListening?'listening':''}" id="mic-btn" onclick="toggleMic()">${isListening?'🔴':'🎤'}</button>
+        <div class="speech-status" id="speech-status">Tap mic, then say the bird name</div>
+      </div>`;
+    }
+
+    // Lily's typing input
+    function renderLilyOptions() {
+      return `<div class="guess-section"><label>Or type your guess:</label>
+        <input type="text" class="guess-input" id="guessInput" placeholder="Type bird name..." oninput="handleInput(this.value)" onfocus="handleInput(this.value)">
+        <div class="suggestions" id="suggestions" style="display:none;"></div></div>`;
+    }
+
+    // Gabriel's multiple choice
+    function renderGabrielOptions() {
+      return `<div class="options-section"><label>Or tap to guess:</label><div class="options-grid">${guessOptions.map((b,i) =>
+        `<button class="option-btn" id="opt-${i}" onclick="guessG('${b.name.replace(/'/g,"\\'")}',${i})">
+          <span class="bird-name">${b.name}</span>
+          <button class="speak-btn" onclick="event.stopPropagation();speak('${b.name.replace(/'/g,"\\'")}')">🔊</button></button>`
+      ).join('')}</div></div>`;
+    }
+
+    // Voice confirmation modal
+    function renderVoiceConfirm() {
+      const topMatch = voiceConfirmBirds[0];
+      return `<div class="voice-confirm-overlay" onclick="cancelVoiceConfirm()">
+        <div class="voice-confirm-modal" onclick="event.stopPropagation()">
+          <h3>Did you say one of these?</h3>
+          <div class="heard-text">Heard: "${lastHeardText}"</div>
+          <div class="bird-options">
+            ${voiceConfirmBirds.map((m, i) => `
+              <button class="voice-bird-btn ${i===0?'top-match':''}" onclick="confirmVoiceBird('${m.bird.name.replace(/'/g,"\\'")}')">
+                <span>${m.bird.name}</span>
+                <span class="match-score">${Math.round(m.score * 100)}%</span>
+              </button>
+            `).join('')}
+          </div>
+          <button class="voice-cancel-btn" onclick="cancelVoiceConfirm()">❌ None of these - try again</button>
+        </div>
+      </div>`;
+    }
+
+    function renderLearn() {
+      const b = BIRDS[learnIndex];
+      setTimeout(() => loadLearnImage(b.name), 0);
+      return `<header><h1>🐦 Bird Game</h1><p class="subtitle">Learn about birds!</p></header>
+        <div class="player-toggle">
+          <button class="player-btn ${currentPlayer==='lily'?'active':''}" onclick="switchPlayer('lily')">🦉 Lily</button>
+          <button class="player-btn ${currentPlayer==='gabriel'?'active':''}" onclick="switchPlayer('gabriel')">🐣 Gabriel</button>
+        </div>
+        <div class="game-tabs">
+          <button class="game-tab" onclick="switchType('clues')">💡 Clues</button>
+          <button class="game-tab" onclick="switchType('image')">📷 Image</button>
+          <button class="game-tab active">📚 Learn</button>
+        </div>
+        <div class="learn-section">
+          <div class="learn-nav">
+            <button class="learn-nav-btn" onclick="learnPrev()" ${learnIndex===0?'disabled':''}>←</button>
+            <span class="learn-counter">${learnIndex+1}/${BIRDS.length}</span>
+            <button class="learn-nav-btn" onclick="learnNext()" ${learnIndex===BIRDS.length-1?'disabled':''}>→</button>
+          </div>
+          <div class="learn-card">
+            <h2 class="learn-bird-name">${b.name}</h2>
+            <div id="learn-placeholder" class="image-placeholder">🐦 Loading...</div>
+            <img class="learn-image" id="learn-image" style="display:none" alt="${b.name}">
+            <div class="learn-facts">
+              <div class="learn-fact"><div class="learn-fact-label">🎨 Color</div><div class="learn-fact-value">${b.color}</div></div>
+              <div class="learn-fact"><div class="learn-fact-label">📏 Size</div><div class="learn-fact-value">${b.size}</div></div>
+              <div class="learn-fact"><div class="learn-fact-label">🌍 Habitat</div><div class="learn-fact-value">${b.habitat}</div></div>
+              <div class="learn-fact"><div class="learn-fact-label">🐦 Type</div><div class="learn-fact-value">${b.type}</div></div>
+              <div class="learn-fact"><div class="learn-fact-label">💡 Fun Fact</div><div class="learn-fact-value">${b.funFact}</div></div>
+            </div>
+          </div>
+        </div>
+        <footer><p>${BIRDS.length} birds • v7 🎤✨</p></footer>`;
+    }
+
+    function renderModal() {
+      const n = currentPlayer==='lily'?'Lily':'Gabriel';
+      return `<div class="modal-overlay" onclick="hideReset()"><div class="modal" onclick="event.stopPropagation()">
+        <h3>Reset ${n}'s Progress?</h3><p>Start fresh with all ${BIRDS.length} birds!</p>
+        <div class="modal-buttons"><button class="modal-btn cancel" onclick="hideReset()">Cancel</button>
+        <button class="modal-btn confirm" onclick="confirmReset()">Reset</button></div></div></div>`;
+    }
+
+    // ===== GAME LOGIC =====
+    function selectPlayer(p) { currentPlayer = p; localStorage.setItem('birdGamePlayer', p); newGame(); }
+    function switchPlayer(p) { if (p !== currentPlayer) { currentPlayer = p; localStorage.setItem('birdGamePlayer', p); if (currentBird && p === 'gabriel') guessOptions = generateOptions(currentBird); render(); } }
+    function switchType(t) { if (t !== gameType) { gameType = t; localStorage.setItem('birdGameType', t); if (t === 'learn') render(); else newGame(); } }
+    
+    function newGame() {
+      currentBird = getRandomBird(currentPlayer, gameType);
+      addHistory(currentPlayer, gameType, currentBird.name);
+      revealedClues = new Set(); gameState = 'playing'; celebrationMessage = ''; hintUsed = false;
+      voiceConfirmBirds = []; lastHeardText = '';
+      if (currentPlayer === 'gabriel') guessOptions = generateOptions(currentBird);
+      render();
+    }
+
+    function revealClue(id) { revealedClues.add(id); render(); }
+    function useHint() { hintUsed = true; render(); }
+    function reveal() { gameState = 'revealed'; updateStreak(false); render(); }
+
+    function handleInput(v) {
+      const s = document.getElementById('suggestions');
+      const sugg = getSuggestions(v);
+      if (sugg.length && v.trim()) {
+        s.innerHTML = sugg.map((n,i) => `<button class="suggestion-btn" id="sug-${i}" onclick="guessL('${n.replace(/'/g,"\\'")}',${i})">${n}</button>`).join('');
+        s.style.display = 'block';
+      } else s.style.display = 'none';
+    }
+
+    function guessL(name, idx) {
+      if (name.toLowerCase() === currentBird.name.toLowerCase()) {
+        gameState = 'won'; celebrationMessage = CELEBRATIONS[Math.floor(Math.random()*CELEBRATIONS.length)];
+        updateStreak(true); confetti(); document.getElementById('suggestions').style.display = 'none'; render();
+      } else {
+        const btn = document.getElementById('sug-' + idx);
+        if (btn) { btn.classList.add('wrong'); setTimeout(() => btn.classList.remove('wrong'), 500); }
+      }
+    }
+
+    function guessG(name, idx) {
+      if (name.toLowerCase() === currentBird.name.toLowerCase()) {
+        gameState = 'won'; celebrationMessage = CELEBRATIONS[Math.floor(Math.random()*CELEBRATIONS.length)];
+        updateStreak(true); confetti(); render();
+      } else {
+        const btn = document.getElementById('opt-' + idx);
+        if (btn) { btn.classList.add('wrong'); setTimeout(() => btn.classList.remove('wrong'), 500); }
+      }
+    }
+
+    function learnPrev() { if (learnIndex > 0) { learnIndex--; render(); } }
+    function learnNext() { if (learnIndex < BIRDS.length - 1) { learnIndex++; render(); } }
+    function showReset() { showResetModal = true; render(); }
+    function hideReset() { showResetModal = false; render(); }
+    function confirmReset() { resetHistory(currentPlayer, 'clues'); resetHistory(currentPlayer, 'image'); streak = 0; localStorage.setItem('birdStreak', '0'); showResetModal = false; newGame(); }
+
+    document.addEventListener('click', e => {
+      const s = document.getElementById('suggestions'), g = document.getElementById('guessInput');
+      if (s && g && !s.contains(e.target) && e.target !== g) s.style.display = 'none';
+    });
+
+    if (currentPlayer) { if (gameType === 'learn') render(); else newGame(); } else render();
+  </script>
+</body>
+</html>
