@@ -128,6 +128,92 @@
     .confetti-piece { position: absolute; top: -20px; animation: confetti-fall 3s ease-out forwards; }
     @keyframes confetti-fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
     
+    /* ===== TOGETHER MODE STYLES ===== */
+    .together-menu { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+    .together-card { display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 16px; border: none; cursor: pointer; text-align: left; background: #fff; box-shadow: 0 3px 12px rgba(0,0,0,0.08); transition: transform 0.15s, box-shadow 0.15s; }
+    .together-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
+    .together-card .tc-icon { font-size: 1.8rem; flex-shrink: 0; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 14px; }
+    .together-card:nth-child(1) .tc-icon { background: linear-gradient(135deg, #ffecd2, #fcb69f); }
+    .together-card:nth-child(2) .tc-icon { background: linear-gradient(135deg, #a8edea, #fed6e3); }
+    .together-card:nth-child(3) .tc-icon { background: linear-gradient(135deg, #d4fc79, #96e6a1); }
+    .together-card:nth-child(4) .tc-icon { background: linear-gradient(135deg, #fbc2eb, #a6c1ee); }
+    .together-card:nth-child(5) .tc-icon { background: linear-gradient(135deg, #ffd89b, #19547b20); }
+    .together-card .tc-info { flex: 1; }
+    .together-card .tc-name { font-size: 1rem; font-weight: 800; color: #333; margin-bottom: 2px; }
+    .together-card .tc-desc { font-size: 0.8rem; color: #888; font-weight: 600; }
+    .together-back-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: 0.85rem; font-weight: 700; font-family: 'Nunito', sans-serif; color: #8b7355; background: #fff; border: 2px solid #e0d5c7; border-radius: 14px; cursor: pointer; margin-bottom: 14px; }
+
+    /* Gallery */
+    .gallery-type-header { font-size: 0.9rem; font-weight: 800; color: #c56cf0; text-transform: uppercase; letter-spacing: 0.5px; margin: 16px 0 8px 4px; padding-bottom: 6px; border-bottom: 2px solid #f0e8ff; }
+    .gallery-type-header:first-child { margin-top: 0; }
+    .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px; }
+    .gallery-item { background: #fff; border-radius: 12px; overflow: hidden; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: transform 0.15s; text-align: center; padding-bottom: 8px; }
+    .gallery-item:hover { transform: scale(1.03); }
+    .gallery-item img { width: 100%; height: 80px; object-fit: cover; background: #f0f0f0; display: block; }
+    .gallery-item .gi-placeholder { width: 100%; height: 80px; display: flex; align-items: center; justify-content: center; background: #f0f0f0; font-size: 1.5rem; }
+    .gallery-item .gi-name { font-size: 0.65rem; font-weight: 700; color: #444; padding: 4px 4px 0; line-height: 1.2; }
+    .gallery-fullscreen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 3000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+    .gallery-fullscreen img { max-width: 100%; max-height: 55vh; object-fit: contain; border-radius: 16px; margin-bottom: 16px; }
+    .gallery-fs-name { font-size: 1.5rem; font-weight: 800; color: #fff; margin-bottom: 6px; text-align: center; }
+    .gallery-fs-fact { font-size: 0.95rem; color: #ccc; text-align: center; margin-bottom: 6px; max-width: 320px; }
+    .gallery-fs-type { font-size: 0.8rem; color: #a0a0ff; font-weight: 700; margin-bottom: 16px; }
+    .gallery-fs-close { padding: 12px 28px; font-size: 1rem; font-weight: 700; font-family: 'Nunito', sans-serif; color: #333; background: #fff; border: none; border-radius: 18px; cursor: pointer; }
+
+    /* Quick Hunt */
+    .hunt-code-display { text-align: center; padding: 20px; background: linear-gradient(135deg, #e8f4ff 0%, #f0e8ff 100%); border-radius: 18px; margin-bottom: 16px; }
+    .hunt-code-label { font-size: 0.9rem; font-weight: 700; color: #666; margin-bottom: 8px; }
+    .hunt-code { font-size: 2.2rem; font-weight: 800; color: #5f27cd; letter-spacing: 4px; }
+    .hunt-code-enter { text-align: center; margin-bottom: 16px; }
+    .hunt-code-input { width: 140px; padding: 12px; font-size: 1.4rem; font-weight: 800; font-family: 'Nunito', sans-serif; text-align: center; border: 3px solid #e0d5c7; border-radius: 14px; letter-spacing: 4px; outline: none; }
+    .hunt-code-input:focus { border-color: #c56cf0; }
+    .hunt-go-btn { margin-left: 8px; padding: 12px 20px; font-size: 1rem; font-weight: 700; font-family: 'Nunito', sans-serif; color: #fff; background: linear-gradient(135deg, #ff6b9d 0%, #c56cf0 100%); border: none; border-radius: 14px; cursor: pointer; }
+    .hunt-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 14px; }
+    .hunt-tile { background: #fff; border-radius: 10px; overflow: hidden; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.06); transition: transform 0.15s; padding-bottom: 6px; text-align: center; border: 3px solid transparent; }
+    .hunt-tile:hover { transform: scale(1.04); }
+    .hunt-tile.correct { border-color: #27ae60; background: #d4edda; animation: pop 0.3s ease; }
+    .hunt-tile.wrong { border-color: #ff6b6b; animation: shake 0.4s ease; }
+    @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+    .hunt-tile img { width: 100%; height: 65px; object-fit: cover; display: block; background: #f0f0f0; }
+    .hunt-tile .ht-placeholder { width: 100%; height: 65px; display: flex; align-items: center; justify-content: center; background: #f0f0f0; font-size: 1.2rem; }
+    .hunt-tile .ht-name { font-size: 0.55rem; font-weight: 700; color: #444; padding: 3px 2px 0; line-height: 1.2; }
+    .hunt-success { text-align: center; padding: 24px; background: linear-gradient(135deg, #d4edda, #c3e6cb); border-radius: 18px; margin-bottom: 16px; }
+    .hunt-success h2 { font-size: 1.4rem; font-weight: 800; color: #155724; margin: 0 0 8px; }
+    .hunt-instructions { text-align: center; font-size: 0.9rem; color: #666; margin-bottom: 14px; padding: 12px; background: #fff; border-radius: 12px; }
+
+    /* Code Match */
+    .code-match-display { text-align: center; padding: 24px; background: #fff; border-radius: 18px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); margin-bottom: 16px; }
+    .code-match-bird-name { font-size: 1.5rem; font-weight: 800; color: #333; margin: 12px 0 6px; }
+    .code-match-fact { font-size: 0.9rem; color: #666; margin-bottom: 12px; }
+    .code-match-img { width: 100%; max-height: 200px; object-fit: contain; border-radius: 12px; margin-bottom: 12px; background: #f8f8f8; }
+
+    /* Bird of the Day */
+    .botd-card { text-align: center; background: linear-gradient(135deg, #fff9e6 0%, #fff0f5 100%); border-radius: 20px; padding: 24px 18px; box-shadow: 0 6px 24px rgba(0,0,0,0.08); margin-bottom: 16px; }
+    .botd-date { font-size: 0.8rem; font-weight: 700; color: #c56cf0; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .botd-name { font-size: 1.6rem; font-weight: 800; color: #333; margin-bottom: 8px; }
+    .botd-image { width: 100%; max-height: 220px; object-fit: contain; border-radius: 14px; margin-bottom: 14px; background: #f8f8f8; }
+    .botd-fact { font-size: 1rem; color: #555; margin-bottom: 16px; line-height: 1.5; font-style: italic; }
+    .botd-wall-prompt { padding: 16px; background: #fff; border-radius: 14px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .botd-wall-prompt p { font-size: 0.95rem; font-weight: 700; color: #8b7355; margin: 0 0 10px; }
+    .botd-check-btn { padding: 14px 28px; font-size: 1.1rem; font-weight: 700; font-family: 'Nunito', sans-serif; color: #fff; background: linear-gradient(135deg, #27ae60, #2ecc71); border: none; border-radius: 18px; cursor: pointer; box-shadow: 0 4px 12px rgba(39,174,96,0.3); transition: transform 0.15s; }
+    .botd-check-btn:hover { transform: scale(1.05); }
+    .botd-check-btn.found { background: linear-gradient(135deg, #f39c12, #f1c40f); color: #7b5e00; }
+    .botd-streak { margin-top: 12px; font-size: 0.9rem; font-weight: 700; color: #c56cf0; }
+
+    /* Memory Match */
+    .memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 14px; }
+    .memory-card { aspect-ratio: 1; background: linear-gradient(135deg, #c56cf0 0%, #ff6b9d 100%); border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; box-shadow: 0 3px 10px rgba(197,108,240,0.3); transition: transform 0.2s; position: relative; overflow: hidden; border: 3px solid transparent; }
+    .memory-card:hover { transform: scale(1.04); }
+    .memory-card.flipped { background: #fff; box-shadow: 0 3px 10px rgba(0,0,0,0.1); cursor: default; }
+    .memory-card.flipped img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; border-radius: 9px; }
+    .memory-card.matched { border-color: #27ae60; opacity: 0.8; }
+    .memory-card.wrong-match { animation: shake 0.4s ease; border-color: #ff6b6b; }
+    .memory-stats { display: flex; justify-content: center; gap: 20px; margin-bottom: 14px; font-size: 0.9rem; font-weight: 700; color: #8b7355; }
+    .memory-stats .ms-value { color: #c56cf0; font-weight: 800; }
+    .memory-win { text-align: center; padding: 24px; background: linear-gradient(135deg, #d4edda, #c3e6cb); border-radius: 18px; margin-bottom: 16px; }
+    .memory-win h2 { font-size: 1.4rem; font-weight: 800; color: #155724; margin: 0 0 8px; }
+    .memory-win p { color: #155724; margin: 0 0 14px; }
+    .memory-card .mc-name { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.92); font-size: 0.5rem; font-weight: 700; padding: 2px; text-align: center; color: #333; line-height: 1.1; }
+
     /* Bird Master Badge in Stats Bar */
     .bird-master-small { background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%); color: #7b5e00; padding: 4px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 700; }
     
@@ -447,6 +533,144 @@
     // Voice confirmation state
     let voiceConfirmBirds = []; // Array of {bird, score} to show for confirmation
     let lastHeardText = ''; // What the speech API heard
+
+    // ===== TOGETHER MODE STATE =====
+    let togetherMode = null; // null, 'menu', 'gallery', 'hunt', 'code', 'botd', 'memory'
+    let galleryFullscreen = null; // bird object or null
+    
+    // Quick Hunt state
+    let huntBird = null;
+    let huntCode = '';
+    let huntGrid = [];
+    let huntFound = false;
+    let huntJoined = false; // true if this is the "joiner" phone
+    
+    // Memory Match state
+    let memoryCards = [];
+    let memoryFlipped = []; // indices of currently flipped cards
+    let memoryMatched = new Set(); // indices of matched cards
+    let memoryTurns = 0;
+    let memoryWon = false;
+    let memoryLocked = false; // prevent clicks during flip animation
+    
+    // Bird of the Day
+    function getBirdOfTheDay() {
+      const today = new Date();
+      const dateStr = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+      let hash = 0;
+      for (let i = 0; i < dateStr.length; i++) hash = ((hash << 5) - hash) + dateStr.charCodeAt(i);
+      return BIRDS[Math.abs(hash) % BIRDS.length];
+    }
+    function getBotdKey() {
+      const d = new Date();
+      return `botd_${d.getFullYear()}_${d.getMonth()}_${d.getDate()}`;
+    }
+    function isBotdFound() { return localStorage.getItem(getBotdKey()) === 'found'; }
+    function markBotdFound() { localStorage.setItem(getBotdKey(), 'found'); }
+    function getBotdStreak() { return parseInt(localStorage.getItem('botd_streak') || '0'); }
+    function getBotdLastFound() { return localStorage.getItem('botd_last_found') || ''; }
+    function incrementBotdStreak() {
+      const today = new Date();
+      const todayStr = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+      const lastFound = getBotdLastFound();
+      
+      // Check if yesterday was found (for consecutive streak)
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = `${yesterday.getFullYear()}-${yesterday.getMonth()}-${yesterday.getDate()}`;
+      
+      let streak = getBotdStreak();
+      if (lastFound === yesterdayStr || lastFound === todayStr) {
+        streak++;
+      } else if (lastFound !== todayStr) {
+        streak = 1; // Reset streak, start fresh
+      }
+      localStorage.setItem('botd_streak', streak);
+      localStorage.setItem('botd_last_found', todayStr);
+      return streak;
+    }
+    function resetBotdStreak() { localStorage.setItem('botd_streak', '0'); }
+    
+    // Gallery - group birds by type
+    function getGalleryGroups() {
+      const typeMap = {
+        'Raptors': b => b.birdOfPrey || ['New World vulture','Old World vulture'].some(t => b.type.toLowerCase().includes(t.toLowerCase())),
+        'Owls': b => b.type.toLowerCase().includes('owl'),
+        'Waterbirds': b => ['duck','goose','swan','pelican','heron','crane','flamingo','grebe','spoonbill'].some(t => b.type.toLowerCase().includes(t)),
+        'Shorebirds': b => ['shorebird','plover','sandpiper','gull','tern','avocet','stilt','godwit','oystercatcher','seabird'].some(t => b.type.toLowerCase().includes(t)),
+        'Songbirds': b => ['warbler','finch','sparrow','chickadee','tit','waxwing','thrush','cardinal','jay','corvid','flycatcher','tyrant'].some(t => b.type.toLowerCase().includes(t)),
+        'Hummingbirds': b => b.type.toLowerCase().includes('hummingbird'),
+        'Parrots & Cockatoos': b => ['parrot','macaw','cockatoo','cockatiel','amazon','lovebird'].some(t => b.type.toLowerCase().includes(t)),
+        'Other Cool Birds': b => true // catch-all
+      };
+      const groups = {};
+      const assigned = new Set();
+      for (const [label, test] of Object.entries(typeMap)) {
+        if (label === 'Other Cool Birds') continue;
+        groups[label] = BIRDS.filter(b => !assigned.has(b.name) && test(b));
+        groups[label].forEach(b => assigned.add(b.name));
+      }
+      groups['Other Cool Birds'] = BIRDS.filter(b => !assigned.has(b.name));
+      // Remove empty groups
+      for (const k of Object.keys(groups)) { if (groups[k].length === 0) delete groups[k]; }
+      return groups;
+    }
+    
+    // Quick Hunt - generate code and grid
+    function startHunt() {
+      huntCode = String(100 + Math.floor(Math.random() * 900)); // 3-digit code
+      huntBird = BIRDS[parseInt(huntCode) % BIRDS.length];
+      huntGrid = generateHuntGrid(huntBird, parseInt(huntCode));
+      huntFound = false;
+      huntJoined = false;
+    }
+    
+    function joinHunt(code) {
+      const c = parseInt(code);
+      if (isNaN(c) || c < 100 || c > 999) return false;
+      huntCode = String(c);
+      huntBird = BIRDS[c % BIRDS.length];
+      // Generate different grid using code+1 as seed variation
+      huntGrid = generateHuntGrid(huntBird, c + 7);
+      huntFound = false;
+      huntJoined = true;
+      return true;
+    }
+    
+    function generateHuntGrid(targetBird, seed) {
+      // Seeded shuffle to get different but deterministic grids
+      const others = BIRDS.filter(b => b.name !== targetBird.name);
+      const seededShuffle = (arr, s) => {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+          s = (s * 16807) % 2147483647;
+          const j = s % (i + 1);
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      };
+      const shuffled = seededShuffle(others, seed);
+      const grid = shuffled.slice(0, 15); // 15 wrong + 1 correct = 16 (4×4)
+      // Insert target at seeded position
+      const pos = seed % 16;
+      grid.splice(pos, 0, targetBird);
+      return grid.slice(0, 16);
+    }
+    
+    // Memory Match
+    function startMemory() {
+      const selected = shuffle([...BIRDS]).slice(0, 8);
+      const pairs = [...selected, ...selected]; // 8 pairs = 16 cards
+      memoryCards = shuffle(pairs.map((bird, i) => ({ bird, id: i })));
+      memoryFlipped = [];
+      memoryMatched = new Set();
+      memoryTurns = 0;
+      memoryWon = false;
+      memoryLocked = false;
+    }
+    
+    function getMemoryWins() { return parseInt(localStorage.getItem('memory_wins') || '0'); }
+    function addMemoryWin() { const w = getMemoryWins() + 1; localStorage.setItem('memory_wins', w); return w; }
 
     function getHistory(p, t) { return JSON.parse(localStorage.getItem(`bh_${p}_${t}`) || '[]'); }
     function addHistory(p, t, n) { const h = getHistory(p, t); localStorage.setItem(`bh_${p}_${t}`, JSON.stringify([n, ...h.filter(x => x !== n)].slice(0, 150))); }
@@ -863,6 +1087,7 @@
       if (!currentPlayer) { app.innerHTML = renderSelect(); return; }
       if (showCompletion) { app.innerHTML = renderCompletion(); return; }
       if (showResetModal) { app.innerHTML = renderGame() + renderModal(); return; }
+      if (galleryFullscreen) { app.innerHTML = renderGame() + renderGalleryFullscreen(); return; }
       if (voiceConfirmBirds.length > 0) { app.innerHTML = renderGame() + renderVoiceConfirm(); return; }
       app.innerHTML = renderGame();
     }
@@ -889,7 +1114,7 @@
           <button class="play-again-btn" onclick="playAgainAfterCompletion()">🐦 Play Again!</button>
           ${streak > 0 ? `<p class="streak-note">🔥 Current streak: ${streak}</p>` : ''}
         </div>
-        <footer><p>${BIRDS.length} birds • v7.3 🏆</p></footer>
+        <footer><p>${BIRDS.length} birds • v8 👫</p></footer>
       </div>`;
     }
 
@@ -914,11 +1139,13 @@
     function renderSelect() {
       return `<div class="mode-selection"><h1>🐦 Bird Game</h1><p>Who's playing?</p><div class="mode-cards">
         <button class="mode-card lily" onclick="selectPlayer('lily')"><div class="emoji">🦉</div><div class="name">Lily</div><div class="desc">Type or speak</div></button>
-        <button class="mode-card gabriel" onclick="selectPlayer('gabriel')"><div class="emoji">🐣</div><div class="name">Gabriel</div><div class="desc">Tap or speak</div></button></div></div>`;
+        <button class="mode-card gabriel" onclick="selectPlayer('gabriel')"><div class="emoji">🐣</div><div class="name">Gabriel</div><div class="desc">Tap or speak</div></button>
+        <button class="mode-card" style="background:linear-gradient(135deg,#d4fc79 0%,#96e6a1 100%);box-shadow:0 5px 16px rgba(150,230,161,0.4);" onclick="selectPlayer('lily');switchType('together')"><div class="emoji">👫</div><div class="name">Together</div><div class="desc">Play as a team!</div></button></div></div>`;
     }
 
     function renderGame() {
       if (gameType === 'learn') return renderLearn();
+      if (gameType === 'together') return renderTogether();
       if (!currentBird) return '<p style="text-align:center;color:#8b7355;">Loading...</p>';
       const isOver = gameState === 'won' || gameState === 'revealed';
       const seen = getSeen(currentPlayer, gameType);
@@ -933,6 +1160,7 @@
           <button class="game-tab ${gameType==='clues'?'active':''}" onclick="switchType('clues')">💡 Clues</button>
           <button class="game-tab ${gameType==='image'?'active':''}" onclick="switchType('image')">📷 Image</button>
           <button class="game-tab ${gameType==='learn'?'active':''}" onclick="switchType('learn')">📚 Learn</button>
+          <button class="game-tab ${gameType==='together'?'active':''}" onclick="switchType('together')">👫 Together</button>
         </div>
         <div class="stats-bar">
           <div class="stat-item">Seen: <span class="stat-value">${seen}</span>/${BIRDS.length}</div>
@@ -945,7 +1173,7 @@
       else if (gameType === 'image') h += renderImage();
       else h += renderClues();
       
-      return h + `<footer><p>${BIRDS.length} birds • v7.3 🏆</p></footer>`;
+      return h + `<footer><p>${BIRDS.length} birds • v8 👫</p></footer>`;
     }
 
     function renderOver() {
@@ -1033,6 +1261,7 @@
           <button class="game-tab" onclick="switchType('clues')">💡 Clues</button>
           <button class="game-tab" onclick="switchType('image')">📷 Image</button>
           <button class="game-tab active">📚 Learn</button>
+          <button class="game-tab" onclick="switchType('together')">👫 Together</button>
         </div>
         <div class="learn-section">
           <div class="learn-nav">
@@ -1053,7 +1282,374 @@
             </div>
           </div>
         </div>
-        <footer><p>${BIRDS.length} birds • v7.3 🏆</p></footer>`;
+        <footer><p>${BIRDS.length} birds • v8 👫</p></footer>`;
+    }
+
+    // ===== TOGETHER MODE RENDERING =====
+    function renderTogether() {
+      let h = `<header><h1>🐦 Bird Game</h1><p class="subtitle">Play together! 👫</p></header>
+        <div class="player-toggle">
+          <button class="player-btn ${currentPlayer==='lily'?'active':''}" onclick="switchPlayer('lily')">🦉 Lily</button>
+          <button class="player-btn ${currentPlayer==='gabriel'?'active':''}" onclick="switchPlayer('gabriel')">🐣 Gabriel</button>
+        </div>
+        <div class="game-tabs">
+          <button class="game-tab" onclick="switchType('clues')">💡 Clues</button>
+          <button class="game-tab" onclick="switchType('image')">📷 Image</button>
+          <button class="game-tab" onclick="switchType('learn')">📚 Learn</button>
+          <button class="game-tab active">👫 Together</button>
+        </div>`;
+      
+      if (togetherMode === 'gallery') h += renderGallery();
+      else if (togetherMode === 'hunt') h += renderHunt();
+      else if (togetherMode === 'code') h += renderCodeMatch();
+      else if (togetherMode === 'botd') h += renderBotd();
+      else if (togetherMode === 'memory') h += renderMemory();
+      else h += renderTogetherMenu();
+      
+      return h + `<footer><p>${BIRDS.length} birds • v8 👫</p></footer>`;
+    }
+
+    function renderTogetherMenu() {
+      return `<div class="together-menu">
+        <button class="together-card" onclick="openTogether('gallery')">
+          <div class="tc-icon">🖼️</div>
+          <div class="tc-info"><div class="tc-name">Gallery</div><div class="tc-desc">Browse all ${BIRDS.length} birds by type</div></div>
+        </button>
+        <button class="together-card" onclick="openTogether('hunt')">
+          <div class="tc-icon">🔍</div>
+          <div class="tc-info"><div class="tc-name">Quick Hunt</div><div class="tc-desc">Race to find the same bird!</div></div>
+        </button>
+        <button class="together-card" onclick="openTogether('code')">
+          <div class="tc-icon">🔢</div>
+          <div class="tc-info"><div class="tc-name">Code Match</div><div class="tc-desc">Share a code, see the same bird</div></div>
+        </button>
+        <button class="together-card" onclick="openTogether('botd')">
+          <div class="tc-icon">☀️</div>
+          <div class="tc-info"><div class="tc-name">Bird of the Day</div><div class="tc-desc">Today's special bird — find it on your wall!</div></div>
+        </button>
+        <button class="together-card" onclick="openTogether('memory')">
+          <div class="tc-icon">🧠</div>
+          <div class="tc-info"><div class="tc-name">Memory Match</div><div class="tc-desc">Flip cards and find bird pairs! (${getMemoryWins()} wins)</div></div>
+        </button>
+      </div>`;
+    }
+
+    function openTogether(mode) {
+      togetherMode = mode;
+      if (mode === 'hunt') startHunt();
+      if (mode === 'memory') startMemory();
+      render();
+    }
+
+    function backToTogetherMenu() {
+      togetherMode = null;
+      galleryFullscreen = null;
+      huntBird = null;
+      huntFound = false;
+      render();
+    }
+
+    // --- GALLERY ---
+    function renderGallery() {
+      const groups = getGalleryGroups();
+      let h = `<button class="together-back-btn" onclick="backToTogetherMenu()">← Back</button>`;
+      
+      for (const [label, birds] of Object.entries(groups)) {
+        h += `<div class="gallery-type-header">${label} (${birds.length})</div>
+          <div class="gallery-grid">`;
+        for (const b of birds) {
+          const imgSrc = b.image || '';
+          h += `<div class="gallery-item" onclick="openGalleryBird('${b.name.replace(/'/g,"\\'")}')">
+            ${imgSrc ? `<img src="${imgSrc}" alt="${b.name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="gi-placeholder" style="display:none">🐦</div>` : `<div class="gi-placeholder">🐦</div>`}
+            <div class="gi-name">${b.name}</div>
+          </div>`;
+        }
+        h += '</div>';
+      }
+      return h;
+    }
+
+    function openGalleryBird(name) {
+      galleryFullscreen = BIRDS.find(b => b.name === name);
+      render();
+    }
+
+    function closeGalleryFullscreen() {
+      galleryFullscreen = null;
+      render();
+    }
+
+    function renderGalleryFullscreen() {
+      if (!galleryFullscreen) return '';
+      const b = galleryFullscreen;
+      return `<div class="gallery-fullscreen" onclick="closeGalleryFullscreen()">
+        ${b.image ? `<img src="${b.image}" alt="${b.name}" onerror="this.style.display='none'">` : ''}
+        <div class="gallery-fs-name">${b.name}</div>
+        <div class="gallery-fs-type">${b.type}</div>
+        <div class="gallery-fs-fact">${b.funFact}</div>
+        <button class="gallery-fs-close" onclick="closeGalleryFullscreen()">Close</button>
+      </div>`;
+    }
+
+    // --- QUICK HUNT ---
+    function renderHunt() {
+      let h = `<button class="together-back-btn" onclick="backToTogetherMenu()">← Back</button>`;
+      
+      if (huntFound) {
+        h += `<div class="hunt-success">
+          <div style="font-size:2.5rem;margin-bottom:8px;">🎉</div>
+          <h2>Found it!</h2>
+          <p style="font-size:1.2rem;font-weight:800;color:#155724;">${huntBird.name}</p>
+          <p style="color:#155724;font-size:0.9rem;">${huntBird.funFact}</p>
+          <button class="new-bird-btn" style="margin-top:14px;" onclick="openTogether('hunt')">🔍 New Hunt</button>
+        </div>`;
+        return h;
+      }
+      
+      if (!huntJoined && huntGrid.length > 0) {
+        // This phone started the hunt — show code and grid
+        h += `<div class="hunt-code-display">
+          <div class="hunt-code-label">Share this code with your partner:</div>
+          <div class="hunt-code">🐦 ${huntCode}</div>
+        </div>
+        <div class="hunt-instructions">Find <strong>${huntBird.name}</strong> in the grid below!</div>`;
+        h += renderHuntGrid();
+      } else if (huntJoined && huntGrid.length > 0) {
+        // This phone joined — show grid with bird name
+        h += `<div class="hunt-code-display">
+          <div class="hunt-code-label">Code: 🐦 ${huntCode}</div>
+        </div>
+        <div class="hunt-instructions">Find <strong>${huntBird.name}</strong> in the grid below!</div>`;
+        h += renderHuntGrid();
+      } else {
+        // Show start/join options
+        h += `<div style="text-align:center;margin-bottom:20px;">
+          <button class="new-bird-btn" onclick="huntStart()">🎲 Start a New Hunt</button>
+        </div>
+        <div style="text-align:center;padding:16px;background:#fff;border-radius:16px;box-shadow:0 3px 12px rgba(0,0,0,0.06);">
+          <p style="font-size:0.95rem;font-weight:700;color:#8b7355;margin:0 0 12px;">Or enter a code from the other phone:</p>
+          <div class="hunt-code-enter">
+            <input class="hunt-code-input" id="huntCodeInput" type="tel" maxlength="3" placeholder="___" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+            <button class="hunt-go-btn" onclick="huntJoin()">Go!</button>
+          </div>
+        </div>`;
+      }
+      return h;
+    }
+
+    function renderHuntGrid() {
+      let h = '<div class="hunt-grid">';
+      for (let i = 0; i < huntGrid.length; i++) {
+        const b = huntGrid[i];
+        h += `<div class="hunt-tile" id="hunt-${i}" onclick="huntTap(${i})">
+          ${b.image ? `<img src="${b.image}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="ht-placeholder" style="display:none">🐦</div>` : `<div class="ht-placeholder">🐦</div>`}
+          <div class="ht-name">${b.name}</div>
+        </div>`;
+      }
+      return h + '</div>';
+    }
+
+    function huntStart() {
+      startHunt();
+      render();
+    }
+
+    function huntJoin() {
+      const input = document.getElementById('huntCodeInput');
+      if (!input) return;
+      if (joinHunt(input.value)) {
+        render();
+      } else {
+        input.style.borderColor = '#ff6b6b';
+        setTimeout(() => { if (input) input.style.borderColor = '#e0d5c7'; }, 1000);
+      }
+    }
+
+    function huntTap(i) {
+      if (huntFound) return;
+      const tile = document.getElementById('hunt-' + i);
+      if (huntGrid[i].name === huntBird.name) {
+        huntFound = true;
+        if (tile) tile.classList.add('correct');
+        confetti();
+        setTimeout(() => render(), 600);
+      } else {
+        if (tile) { tile.classList.add('wrong'); setTimeout(() => tile.classList.remove('wrong'), 500); }
+      }
+    }
+
+    // --- CODE MATCH ---
+    function renderCodeMatch() {
+      let h = `<button class="together-back-btn" onclick="backToTogetherMenu()">← Back</button>`;
+      
+      if (huntBird && huntCode) {
+        // Show the matched bird
+        h += `<div class="code-match-display">
+          <div class="hunt-code-display" style="margin-bottom:14px;">
+            <div class="hunt-code-label">Code:</div>
+            <div class="hunt-code">🐦 ${huntCode}</div>
+          </div>
+          ${huntBird.image ? `<img class="code-match-img" src="${huntBird.image}" alt="${huntBird.name}" onerror="this.style.display='none'">` : ''}
+          <div class="code-match-bird-name">${huntBird.name}</div>
+          <div class="code-match-fact">${huntBird.funFact}</div>
+          <p style="font-size:0.8rem;color:#999;">${huntBird.type} · ${huntBird.habitat}</p>
+        </div>
+        <div style="text-align:center;">
+          <button class="new-bird-btn" onclick="codeMatchNew()">🔢 New Code</button>
+        </div>`;
+      } else {
+        // Show generate / enter
+        h += `<div style="text-align:center;margin-bottom:20px;">
+          <button class="new-bird-btn" onclick="codeMatchGenerate()">🎲 Generate a Code</button>
+        </div>
+        <div style="text-align:center;padding:16px;background:#fff;border-radius:16px;box-shadow:0 3px 12px rgba(0,0,0,0.06);">
+          <p style="font-size:0.95rem;font-weight:700;color:#8b7355;margin:0 0 12px;">Or enter a code:</p>
+          <div class="hunt-code-enter">
+            <input class="hunt-code-input" id="codeInput" type="tel" maxlength="3" placeholder="___" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+            <button class="hunt-go-btn" onclick="codeMatchJoin()">Go!</button>
+          </div>
+        </div>`;
+      }
+      return h;
+    }
+
+    function codeMatchGenerate() {
+      huntCode = String(100 + Math.floor(Math.random() * 900));
+      huntBird = BIRDS[parseInt(huntCode) % BIRDS.length];
+      render();
+    }
+
+    function codeMatchJoin() {
+      const input = document.getElementById('codeInput');
+      if (!input) return;
+      const c = parseInt(input.value);
+      if (isNaN(c) || c < 100 || c > 999) {
+        input.style.borderColor = '#ff6b6b';
+        setTimeout(() => { if (input) input.style.borderColor = '#e0d5c7'; }, 1000);
+        return;
+      }
+      huntCode = String(c);
+      huntBird = BIRDS[c % BIRDS.length];
+      render();
+    }
+
+    function codeMatchNew() {
+      huntBird = null;
+      huntCode = '';
+      render();
+    }
+
+    // --- BIRD OF THE DAY ---
+    function renderBotd() {
+      const bird = getBirdOfTheDay();
+      const found = isBotdFound();
+      const streak = getBotdStreak();
+      const today = new Date();
+      const dateFormatted = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+      
+      let h = `<button class="together-back-btn" onclick="backToTogetherMenu()">← Back</button>
+        <div class="botd-card">
+          <div class="botd-date">☀️ ${dateFormatted}</div>
+          <div class="botd-name">${bird.name}</div>
+          ${bird.image ? `<img class="botd-image" src="${bird.image}" alt="${bird.name}" onerror="this.style.display='none'">` : ''}
+          <div class="botd-fact">"${bird.funFact}"</div>
+          <p style="font-size:0.85rem;color:#888;margin:0 0 4px;">${bird.type} · ${bird.size}</p>
+          <p style="font-size:0.85rem;color:#888;margin:0 0 16px;">${bird.habitat}</p>
+          <div class="botd-wall-prompt">
+            <p>🖼️ Can you find this bird on your wall?</p>
+            ${found 
+              ? `<button class="botd-check-btn found" disabled>✅ Found it today!</button>`
+              : `<button class="botd-check-btn" onclick="botdFoundIt()">✅ I found it!</button>`}
+          </div>
+          ${streak > 0 ? `<div class="botd-streak">🔥 ${streak} day${streak!==1?'s':''} in a row!</div>` : ''}
+        </div>`;
+      return h;
+    }
+
+    function botdFoundIt() {
+      if (!isBotdFound()) {
+        markBotdFound();
+        incrementBotdStreak();
+        confetti();
+      }
+      render();
+    }
+
+    // --- MEMORY MATCH ---
+    function renderMemory() {
+      let h = `<button class="together-back-btn" onclick="backToTogetherMenu()">← Back</button>`;
+      
+      if (memoryWon) {
+        const wins = getMemoryWins();
+        h += `<div class="memory-win">
+          <div style="font-size:2.5rem;margin-bottom:8px;">🎉🧠🎉</div>
+          <h2>You found all the pairs!</h2>
+          <p>Finished in <strong>${memoryTurns} turns</strong></p>
+          <p style="font-size:0.85rem;">Team wins: <strong>${wins}</strong></p>
+          <button class="new-bird-btn" style="margin-top:10px;" onclick="openTogether('memory')">🧠 Play Again</button>
+        </div>`;
+        return h;
+      }
+      
+      h += `<div class="memory-stats">
+        <div>Turns: <span class="ms-value">${memoryTurns}</span></div>
+        <div>Pairs: <span class="ms-value">${memoryMatched.size / 2}</span>/8</div>
+        <div>Wins: <span class="ms-value">${getMemoryWins()}</span></div>
+      </div>`;
+      
+      h += '<div class="memory-grid">';
+      for (let i = 0; i < memoryCards.length; i++) {
+        const card = memoryCards[i];
+        const isFlipped = memoryFlipped.includes(i) || memoryMatched.has(i);
+        const isMatched = memoryMatched.has(i);
+        
+        if (isFlipped) {
+          h += `<div class="memory-card flipped ${isMatched?'matched':''}" onclick="memoryTap(${i})">
+            ${card.bird.image ? `<img src="${card.bird.image}" alt="${card.bird.name}" loading="lazy" onerror="this.style.display='none'">` : ''}
+            <div class="mc-name">${card.bird.name}</div>
+          </div>`;
+        } else {
+          h += `<div class="memory-card" id="mem-${i}" onclick="memoryTap(${i})">🐦</div>`;
+        }
+      }
+      h += '</div>';
+      return h;
+    }
+
+    function memoryTap(i) {
+      if (memoryLocked) return;
+      if (memoryFlipped.includes(i) || memoryMatched.has(i)) return;
+      
+      memoryFlipped.push(i);
+      render();
+      
+      if (memoryFlipped.length === 2) {
+        memoryLocked = true;
+        memoryTurns++;
+        const [a, b] = memoryFlipped;
+        
+        if (memoryCards[a].bird.name === memoryCards[b].bird.name) {
+          // Match!
+          memoryMatched.add(a);
+          memoryMatched.add(b);
+          memoryFlipped = [];
+          memoryLocked = false;
+          
+          if (memoryMatched.size === memoryCards.length) {
+            memoryWon = true;
+            addMemoryWin();
+            confetti();
+          }
+          render();
+        } else {
+          // No match - flip back after delay
+          setTimeout(() => {
+            memoryFlipped = [];
+            memoryLocked = false;
+            render();
+          }, 1200);
+        }
+      }
     }
 
     function renderModal() {
@@ -1066,7 +1662,7 @@
 
     function selectPlayer(p) { currentPlayer = p; localStorage.setItem('birdGamePlayer', p); newGame(); }
     function switchPlayer(p) { if (p !== currentPlayer) { currentPlayer = p; localStorage.setItem('birdGamePlayer', p); if (currentBird && p === 'gabriel') guessOptions = generateOptions(currentBird); render(); } }
-    function switchType(t) { if (t !== gameType) { gameType = t; localStorage.setItem('birdGameType', t); if (t === 'learn') render(); else newGame(); } }
+    function switchType(t) { if (t !== gameType) { gameType = t; localStorage.setItem('birdGameType', t); if (t === 'together') { togetherMode = null; render(); } else if (t === 'learn') render(); else newGame(); } }
     
     function newGame() {
       // Check if player has seen all birds - show completion screen!
@@ -1140,7 +1736,7 @@
       if (s && g && !s.contains(e.target) && e.target !== g) s.style.display = 'none';
     });
 
-    if (currentPlayer) { if (gameType === 'learn') render(); else newGame(); } else render();
+    if (currentPlayer) { if (gameType === 'learn' || gameType === 'together') render(); else newGame(); } else render();
   </script>
 </body>
 </html>
