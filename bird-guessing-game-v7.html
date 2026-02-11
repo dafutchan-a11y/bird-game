@@ -510,6 +510,33 @@
       }
     }
 
+    // Universal fallback: if a static Wikimedia URL fails, try the Wikipedia API
+    async function tryLoadBirdImage(img, birdName) {
+      const url = await fetchBirdImage(birdName);
+      if (url) {
+        img.onerror = null; // Don't recurse
+        img.onload = () => { img.style.display = 'block'; const ph = img.previousElementSibling || img.nextElementSibling; if (ph && ph.classList && ph.classList.contains('gi-placeholder')) ph.style.display = 'none'; if (ph && ph.classList && ph.classList.contains('ht-placeholder')) ph.style.display = 'none'; };
+        img.src = url;
+      }
+    }
+    // Make it available to inline onerror handlers
+    window.tryLoadBirdImage = tryLoadBirdImage;
+
+    // Load a single Together-mode image by element ID
+    async function loadTogetherImage(imgId, placeholderId, birdName) {
+      const img = document.getElementById(imgId);
+      const placeholder = document.getElementById(placeholderId);
+      if (!img) return;
+      const url = await fetchBirdImage(birdName);
+      if (url) {
+        img.onload = () => { img.style.display = 'block'; if (placeholder) placeholder.style.display = 'none'; };
+        img.onerror = () => { if (placeholder) placeholder.innerHTML = '🐦'; };
+        img.src = url;
+      } else {
+        if (placeholder) placeholder.innerHTML = '🐦';
+      }
+    }
+
     const CLUE_CATEGORIES = [
       { id: 'color', label: 'Color', icon: '🎨', key: 'color' },
       { id: 'size', label: 'Size', icon: '📏', key: 'size' },
@@ -1358,9 +1385,10 @@
         h += `<div class="gallery-type-header">${label} (${birds.length})</div>
           <div class="gallery-grid">`;
         for (const b of birds) {
-          const imgSrc = b.image || '';
-          h += `<div class="gallery-item" onclick="openGalleryBird('${b.name.replace(/'/g,"\\'")}')">
-            ${imgSrc ? `<img src="${imgSrc}" alt="${b.name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="gi-placeholder" style="display:none">🐦</div>` : `<div class="gi-placeholder">🐦</div>`}
+          const esc = b.name.replace(/'/g,"\\'");
+          h += `<div class="gallery-item" onclick="openGalleryBird('${esc}')">
+            <div class="gi-placeholder" id="gph-${b.name.replace(/[^a-zA-Z0-9]/g,'')}">🐦</div>
+            <img src="${b.image || ''}" alt="${b.name}" loading="lazy" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'" onerror="tryLoadBirdImage(this,'${esc}')">
             <div class="gi-name">${b.name}</div>
           </div>`;
         }
@@ -1382,8 +1410,12 @@
     function renderGalleryFullscreen() {
       if (!galleryFullscreen) return '';
       const b = galleryFullscreen;
+      const esc = b.name.replace(/'/g,"\\'");
+      // Trigger async image load after render
+      setTimeout(() => loadTogetherImage('gallery-fs-img', 'gallery-fs-ph', b.name), 0);
       return `<div class="gallery-fullscreen" onclick="closeGalleryFullscreen()">
-        ${b.image ? `<img src="${b.image}" alt="${b.name}" onerror="this.style.display='none'">` : ''}
+        <div id="gallery-fs-ph" class="image-placeholder" style="color:#fff;font-size:2rem;">🐦 Loading...</div>
+        <img id="gallery-fs-img" style="display:none;max-width:100%;max-height:55vh;object-fit:contain;border-radius:16px;margin-bottom:16px;" alt="${b.name}">
         <div class="gallery-fs-name">${b.name}</div>
         <div class="gallery-fs-type">${b.type}</div>
         <div class="gallery-fs-fact">${b.funFact}</div>
@@ -1441,8 +1473,10 @@
       let h = '<div class="hunt-grid">';
       for (let i = 0; i < huntGrid.length; i++) {
         const b = huntGrid[i];
+        const esc = b.name.replace(/'/g,"\\'");
         h += `<div class="hunt-tile" id="hunt-${i}" onclick="huntTap(${i})">
-          ${b.image ? `<img src="${b.image}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="ht-placeholder" style="display:none">🐦</div>` : `<div class="ht-placeholder">🐦</div>`}
+          <div class="ht-placeholder">🐦</div>
+          <img src="${b.image || ''}" alt="" loading="lazy" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'" onerror="tryLoadBirdImage(this,'${esc}')">
           <div class="ht-name">${b.name}</div>
         </div>`;
       }
@@ -1483,13 +1517,15 @@
       let h = `<button class="together-back-btn" onclick="backToTogetherMenu()">← Back</button>`;
       
       if (huntBird && huntCode) {
-        // Show the matched bird
+        // Show the matched bird - trigger async image load
+        setTimeout(() => loadTogetherImage('code-match-img', 'code-match-ph', huntBird.name), 0);
         h += `<div class="code-match-display">
           <div class="hunt-code-display" style="margin-bottom:14px;">
             <div class="hunt-code-label">Code:</div>
             <div class="hunt-code">🐦 ${huntCode}</div>
           </div>
-          ${huntBird.image ? `<img class="code-match-img" src="${huntBird.image}" alt="${huntBird.name}" onerror="this.style.display='none'">` : ''}
+          <div id="code-match-ph" class="image-placeholder">🐦 Loading...</div>
+          <img id="code-match-img" class="code-match-img" style="display:none" alt="${huntBird.name}">
           <div class="code-match-bird-name">${huntBird.name}</div>
           <div class="code-match-fact">${huntBird.funFact}</div>
           <p style="font-size:0.8rem;color:#999;">${huntBird.type} · ${huntBird.habitat}</p>
@@ -1547,11 +1583,15 @@
       const today = new Date();
       const dateFormatted = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
       
+      // Trigger async image load
+      setTimeout(() => loadTogetherImage('botd-img', 'botd-ph', bird.name), 0);
+      
       let h = `<button class="together-back-btn" onclick="backToTogetherMenu()">← Back</button>
         <div class="botd-card">
           <div class="botd-date">☀️ ${dateFormatted}</div>
           <div class="botd-name">${bird.name}</div>
-          ${bird.image ? `<img class="botd-image" src="${bird.image}" alt="${bird.name}" onerror="this.style.display='none'">` : ''}
+          <div id="botd-ph" class="image-placeholder" style="min-height:150px;">🐦 Loading...</div>
+          <img id="botd-img" class="botd-image" style="display:none" alt="${bird.name}">
           <div class="botd-fact">"${bird.funFact}"</div>
           <p style="font-size:0.85rem;color:#888;margin:0 0 4px;">${bird.type} · ${bird.size}</p>
           <p style="font-size:0.85rem;color:#888;margin:0 0 16px;">${bird.habitat}</p>
@@ -1604,8 +1644,9 @@
         const isMatched = memoryMatched.has(i);
         
         if (isFlipped) {
+          const esc = card.bird.name.replace(/'/g,"\\'");
           h += `<div class="memory-card flipped ${isMatched?'matched':''}" onclick="memoryTap(${i})">
-            ${card.bird.image ? `<img src="${card.bird.image}" alt="${card.bird.name}" loading="lazy" onerror="this.style.display='none'">` : ''}
+            <img src="${card.bird.image || ''}" alt="${card.bird.name}" loading="lazy" onerror="tryLoadBirdImage(this,'${esc}')">
             <div class="mc-name">${card.bird.name}</div>
           </div>`;
         } else {
