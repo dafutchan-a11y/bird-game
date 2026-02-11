@@ -510,19 +510,42 @@
       }
     }
 
-    // Universal fallback: if a static Wikimedia URL fails, try the Wikipedia API
-    async function tryLoadBirdImage(img, birdName) {
-      const url = await fetchBirdImage(birdName);
-      if (url) {
-        img.onerror = null; // Don't recurse
-        img.onload = () => { img.style.display = 'block'; const ph = img.previousElementSibling || img.nextElementSibling; if (ph && ph.classList && ph.classList.contains('gi-placeholder')) ph.style.display = 'none'; if (ph && ph.classList && ph.classList.contains('ht-placeholder')) ph.style.display = 'none'; };
-        img.src = url;
+    // ===== IMAGE LOADING FOR TOGETHER MODE =====
+    // Strategy: Use static URLs first (instant for ~60%), queue API fallback for failures
+    
+    let apiFetchQueue = [];
+    let apiFetching = false;
+    
+    async function processApiFetchQueue() {
+      if (apiFetching || apiFetchQueue.length === 0) return;
+      apiFetching = true;
+      
+      while (apiFetchQueue.length > 0) {
+        const { img, placeholder, birdName } = apiFetchQueue.shift();
+        // Check if elements are still in DOM (user might have navigated away)
+        if (!document.body.contains(img)) continue;
+        
+        const url = await fetchBirdImage(birdName);
+        if (url && document.body.contains(img)) {
+          img.onload = () => { img.style.display = 'block'; if (placeholder && document.body.contains(placeholder)) placeholder.style.display = 'none'; };
+          img.onerror = null;
+          img.src = url;
+        }
+        // Small delay to avoid hammering the API
+        await new Promise(r => setTimeout(r, 50));
       }
+      apiFetching = false;
     }
-    // Make it available to inline onerror handlers
-    window.tryLoadBirdImage = tryLoadBirdImage;
+    
+    // Queue an image for API fallback
+    function queueApiFallback(img, placeholder, birdName) {
+      apiFetchQueue.push({ img, placeholder, birdName });
+      processApiFetchQueue();
+    }
+    // Make available to inline onerror
+    window.queueApiFallback = queueApiFallback;
 
-    // Load a single Together-mode image by element ID
+    // Load a single Together-mode image by element ID (used by Code Match, BOTD, Gallery Fullscreen)
     async function loadTogetherImage(imgId, placeholderId, birdName) {
       const img = document.getElementById(imgId);
       const placeholder = document.getElementById(placeholderId);
@@ -1373,11 +1396,13 @@
       galleryFullscreen = null;
       huntBird = null;
       huntFound = false;
+      apiFetchQueue = []; // Stop any pending image loads
       render();
     }
 
     // --- GALLERY ---
     function renderGallery() {
+      apiFetchQueue = []; // Clear any stale requests
       const groups = getGalleryGroups();
       let h = `<button class="together-back-btn" onclick="backToTogetherMenu()">← Back</button>`;
       
@@ -1386,9 +1411,13 @@
           <div class="gallery-grid">`;
         for (const b of birds) {
           const esc = b.name.replace(/'/g,"\\'");
+          // Use static URL first; onerror queues API fallback
           h += `<div class="gallery-item" onclick="openGalleryBird('${esc}')">
-            <div class="gi-placeholder" id="gph-${b.name.replace(/[^a-zA-Z0-9]/g,'')}">🐦</div>
-            <img src="${b.image || ''}" alt="${b.name}" loading="lazy" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'" onerror="tryLoadBirdImage(this,'${esc}')">
+            <div class="gi-placeholder" id="gph_${b.name.replace(/[^a-zA-Z0-9]/g,'_')}">🐦</div>
+            <img src="${b.image || ''}" alt="${b.name}" 
+              style="display:none;width:100%;height:80px;object-fit:cover;" 
+              onload="this.style.display='block';this.previousElementSibling.style.display='none'" 
+              onerror="queueApiFallback(this,this.previousElementSibling,'${esc}')">
             <div class="gi-name">${b.name}</div>
           </div>`;
         }
@@ -1470,13 +1499,18 @@
     }
 
     function renderHuntGrid() {
+      // Clear any pending image loads from previous hunt
+      apiFetchQueue = [];
       let h = '<div class="hunt-grid">';
       for (let i = 0; i < huntGrid.length; i++) {
         const b = huntGrid[i];
         const esc = b.name.replace(/'/g,"\\'");
         h += `<div class="hunt-tile" id="hunt-${i}" onclick="huntTap(${i})">
           <div class="ht-placeholder">🐦</div>
-          <img src="${b.image || ''}" alt="" loading="lazy" style="display:none" onload="this.style.display='block';this.previousElementSibling.style.display='none'" onerror="tryLoadBirdImage(this,'${esc}')">
+          <img src="${b.image || ''}" alt="" 
+            style="display:none;width:100%;height:65px;object-fit:cover;" 
+            onload="this.style.display='block';this.previousElementSibling.style.display='none'" 
+            onerror="queueApiFallback(this,this.previousElementSibling,'${esc}')">
           <div class="ht-name">${b.name}</div>
         </div>`;
       }
@@ -1646,7 +1680,9 @@
         if (isFlipped) {
           const esc = card.bird.name.replace(/'/g,"\\'");
           h += `<div class="memory-card flipped ${isMatched?'matched':''}" onclick="memoryTap(${i})">
-            <img src="${card.bird.image || ''}" alt="${card.bird.name}" loading="lazy" onerror="tryLoadBirdImage(this,'${esc}')">
+            <img src="${card.bird.image || ''}" alt="${card.bird.name}" 
+              onload="this.style.display='block'" 
+              onerror="queueApiFallback(this,null,'${esc}')">
             <div class="mc-name">${card.bird.name}</div>
           </div>`;
         } else {
